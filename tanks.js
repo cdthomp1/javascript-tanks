@@ -116,7 +116,7 @@ class Bullet {
     }
 }
 
-// Enemy class with smooth movement and rotating when hitting a wall
+// Enemy class with player-influenced movement
 class EnemyTank {
     constructor(x, y, color = 'green') {
         this.x = x;
@@ -134,7 +134,7 @@ class EnemyTank {
     }
 
     // Move the enemy tank forward or backward
-    move() {
+    move(player) {
         if (this.isBackingUp) {
             // Back up for a short duration
             this.backUp();
@@ -150,6 +150,9 @@ class EnemyTank {
 
             // Handle boundary collisions by backing up and changing direction
             this.checkBoundaryCollision();
+
+            // Update the target angle to be influenced by the player's position
+            this.updateTargetAngle(player);
         }
     }
 
@@ -174,6 +177,20 @@ class EnemyTank {
             this.isBackingUp = true;
             this.backupTime = 20; // Back up for a few frames
         }
+    }
+
+    // Update target angle based on player position with a weighted influence
+    updateTargetAngle(player) {
+        const influenceFactor = 0.25; // Degree of influence toward the player (0 = no influence, 1 = full follow)
+
+        // Calculate the angle toward the player
+        const dx = player.x - this.x;
+        const dy = player.y - this.y;
+        const angleToPlayer = Math.atan2(dy, dx);
+
+        // Blend random movement with influence toward the player
+        const randomAngle = this.angle + (Math.random() * Math.PI / 2 - Math.PI / 4);
+        this.targetAngle = (1 - influenceFactor) * randomAngle + influenceFactor * angleToPlayer;
     }
 
     // Draw the enemy tank
@@ -259,7 +276,7 @@ function gameLoop() {
 
     // Move and draw enemies
     enemies.forEach(enemy => {
-        enemy.move();
+        enemy.move(player);
         enemy.draw();
     });
 
