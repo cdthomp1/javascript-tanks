@@ -116,7 +116,7 @@ class Bullet {
     }
 }
 
-// Enemy class
+// Enemy class with smooth movement and turning
 class EnemyTank {
     constructor(x, y, color = 'green') {
         this.x = x;
@@ -124,22 +124,29 @@ class EnemyTank {
         this.color = color;
         this.width = 40;
         this.height = 40;
-        this.isDestroyed = false;
+        this.angle = Math.random() * Math.PI * 2; // Initial random angle
         this.speed = 1.5;
-        this.direction = Math.random() * Math.PI * 2; // Random initial direction
+        this.rotationSpeed = 0.02; // Rotation speed for smoother turns
+        this.targetAngle = this.angle; // Target angle to rotate towards
+        this.isDestroyed = false;
     }
 
-    // Move the enemy tank in a random direction
+    // Move the enemy tank forward
     move() {
-        this.x += Math.cos(this.direction) * this.speed;
-        this.y += Math.sin(this.direction) * this.speed;
-
-        // Check for boundary collision and change direction
-        if (this.x < 0 || this.x > canvas.width) {
-            this.direction = Math.PI - this.direction; // Reverse horizontal direction
+        // Rotate toward the target angle smoothly
+        if (this.angle < this.targetAngle) {
+            this.angle += this.rotationSpeed;
+        } else if (this.angle > this.targetAngle) {
+            this.angle -= this.rotationSpeed;
         }
-        if (this.y < 0 || this.y > canvas.height) {
-            this.direction = -this.direction; // Reverse vertical direction
+
+        // Move forward in the direction of the angle
+        this.x += Math.cos(this.angle) * this.speed;
+        this.y += Math.sin(this.angle) * this.speed;
+
+        // Check for boundary collision and set new target angle
+        if (this.x < 0 || this.x > canvas.width || this.y < 0 || this.y > canvas.height) {
+            this.targetAngle = Math.random() * Math.PI * 2; // New random direction
         }
 
         // Ensure the enemy stays within the canvas bounds
@@ -152,6 +159,7 @@ class EnemyTank {
         if (!this.isDestroyed) {
             ctx.save();
             ctx.translate(this.x, this.y);
+            ctx.rotate(this.angle);
             ctx.fillStyle = this.color;
             ctx.fillRect(-this.width / 2, -this.height / 2, this.width, this.height);
             ctx.restore();
