@@ -116,7 +116,7 @@ class Bullet {
     }
 }
 
-// Enemy class with smooth movement and turning
+// Enemy class with smooth movement and rotating when hitting a wall
 class EnemyTank {
     constructor(x, y, color = 'green') {
         this.x = x;
@@ -126,45 +126,53 @@ class EnemyTank {
         this.height = 40;
         this.angle = Math.random() * Math.PI * 2; // Initial random angle
         this.speed = 1.5;
-        this.rotationSpeed = 0.02; // Rotation speed for smoother turns
+        this.rotationSpeed = 0.03; // Rotation speed for smoother turns
         this.targetAngle = this.angle; // Target angle to rotate towards
         this.isDestroyed = false;
+        this.isBackingUp = false; // Whether the enemy is backing up after hitting a wall
+        this.backupTime = 0; // How long to back up after hitting a wall
     }
 
-    // Move the enemy tank forward
+    // Move the enemy tank forward or backward
     move() {
-        // Rotate toward the target angle smoothly
-        if (this.angle < this.targetAngle) {
-            this.angle += this.rotationSpeed;
-        } else if (this.angle > this.targetAngle) {
-            this.angle -= this.rotationSpeed;
+        if (this.isBackingUp) {
+            // Back up for a short duration
+            this.backUp();
+        } else {
+            // Rotate toward the target angle smoothly
+            if (Math.abs(this.angle - this.targetAngle) > 0.01) {
+                this.angle += this.rotationSpeed * Math.sign(this.targetAngle - this.angle);
+            }
+
+            // Move forward in the direction of the angle
+            this.x += Math.cos(this.angle) * this.speed;
+            this.y += Math.sin(this.angle) * this.speed;
+
+            // Handle boundary collisions by backing up and changing direction
+            this.checkBoundaryCollision();
         }
-
-        // Move forward in the direction of the angle
-        this.x += Math.cos(this.angle) * this.speed;
-        this.y += Math.sin(this.angle) * this.speed;
-
-        // Handle boundary collisions by changing direction
-        this.checkBoundaryCollision();
     }
 
-    // Boundary check and direction change
+    // Back up for a short duration, then change direction
+    backUp() {
+        this.x -= Math.cos(this.angle) * this.speed; // Move backward
+        this.y -= Math.sin(this.angle) * this.speed;
+        this.backupTime--;
+
+        if (this.backupTime <= 0) {
+            // Once done backing up, choose a new random direction and stop backing up
+            this.targetAngle = this.angle + (Math.random() * Math.PI / 2 - Math.PI / 4); // Random small rotation
+            this.isBackingUp = false;
+        }
+    }
+
+    // Boundary check and start backing up if necessary
     checkBoundaryCollision() {
         const margin = 20; // Margin to avoid corners
-        if (this.x < margin) {
-            this.x = margin;
-            this.targetAngle = Math.random() * Math.PI; // Change to a random angle away from the edge
-        } else if (this.x > canvas.width - margin) {
-            this.x = canvas.width - margin;
-            this.targetAngle = Math.PI + Math.random() * Math.PI; // Change to a random angle away from the edge
-        }
-
-        if (this.y < margin) {
-            this.y = margin;
-            this.targetAngle = Math.random() * Math.PI * 2; // Change to a random angle away from the edge
-        } else if (this.y > canvas.height - margin) {
-            this.y = canvas.height - margin;
-            this.targetAngle = Math.random() * Math.PI * 2; // Change to a random angle away from the edge
+        if (this.x < margin || this.x > canvas.width - margin || this.y < margin || this.y > canvas.height - margin) {
+            // Start backing up and rotate when hitting a wall
+            this.isBackingUp = true;
+            this.backupTime = 20; // Back up for a few frames
         }
     }
 
