@@ -1,11 +1,16 @@
 const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
+const gameOverModal = document.getElementById('gameOverModal');
+const gameOverOverlay = document.getElementById('gameOverOverlay');
+const resetButton = document.getElementById('resetButton');
 
-// Initialize player, enemy tanks, and barriers
+// Initialize player, enemy tanks, bullets, and barriers
 let player;
 let bullets;
 let enemies;
-let barriers; // Array to store barriers
+let barriers;
+let enemyBullets; // Array to store enemy bullets
+let isGameOver = false; // Track whether the game is over
 
 // Function to initialize or reset the game
 function initializeGame() {
@@ -13,6 +18,7 @@ function initializeGame() {
     bullets = []; // Array to store active bullets
     enemies = []; // Array to store enemy tanks
     barriers = []; // Array to store barriers
+    enemyBullets = []; // Array to store enemy bullets
 
     // Create a few enemy tanks
     for (let i = 0; i < 3; i++) {
@@ -24,10 +30,22 @@ function initializeGame() {
     barriers.push(new Barrier(200, 150, 100, 50, 'gray'));
     barriers.push(new Barrier(500, 350, 150, 50, 'gray'));
     barriers.push(new Barrier(300, 100, 50, 200, 'gray'));
+
+    hideGameOver(); // Hide game over modal when initializing the game
+    isGameOver = false; // Reset the game state
 }
 
-// Initialize the game for the first time
-initializeGame();
+// Function to show the Game Over modal
+function showGameOver() {
+    gameOverModal.style.display = 'block';
+    gameOverOverlay.style.display = 'block';
+}
+
+// Function to hide the Game Over modal
+function hideGameOver() {
+    gameOverModal.style.display = 'none';
+    gameOverOverlay.style.display = 'none';
+}
 
 // Controls
 const keys = {};
@@ -53,15 +71,23 @@ canvas.addEventListener('click', () => {
     player.shoot(bullets); // Fire bullet from turret
 });
 
-// Function to reset the game after all enemies are destroyed
+// Function to handle the reset game logic
 function resetGame() {
-    setTimeout(() => {
-        initializeGame(); // Reset the game after a short delay
-    }, 1000); // 1 second delay before resetting the game
+    // Show the Game Over modal
+    showGameOver();
+    isGameOver = true; // Set the game state to "over" to pause the game loop
 }
+
+// Event listener for resetting the game via button
+resetButton.addEventListener('click', () => {
+    initializeGame(); // Reinitialize the game when the reset button is clicked
+    requestAnimationFrame(gameLoop); // Resume the game loop
+});
 
 // Game loop
 function gameLoop() {
+    if (isGameOver) return; // Stop the game loop if the game is over
+
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
     // Draw the barriers
@@ -69,7 +95,7 @@ function gameLoop() {
         barrier.draw(ctx);
     });
 
-    // Handle controls
+    // Handle player controls
     if (keys['w']) player.moveForward(enemies, barriers);
     if (keys['s']) player.moveBackward(enemies, barriers);
     if (keys['a']) player.rotateLeft();
@@ -78,7 +104,7 @@ function gameLoop() {
     // Draw the player tank and its turret
     player.draw(ctx);
 
-    // Move and draw bullets
+    // Move and draw player bullets
     for (let i = bullets.length - 1; i >= 0; i--) {
         const bullet = bullets[i];
         bullet.move();
@@ -101,22 +127,44 @@ function gameLoop() {
         }
     }
 
+    // Move and draw enemy bullets
+    for (let i = enemyBullets.length - 1; i >= 0; i--) {
+        const bullet = enemyBullets[i];
+        bullet.move();
+        bullet.draw(ctx);
+
+        // Check for ricochet and remove bullet if needed
+        if (bullet.ricochetIfNeeded(canvas, barriers)) {
+            enemyBullets.splice(i, 1); // Remove the bullet if it should be destroyed
+            continue; // Skip further checks for this bullet
+        }
+
+        // Check if the bullet hits the player
+        if (bullet.isCollidingWithPlayer(player)) {
+            resetGame(); // Show the Game Over modal and pause the game
+            return; // Exit the game loop for this frame
+        }
+    }
+
     // Move and draw enemies
     let allEnemiesDestroyed = true;
     enemies.forEach(enemy => {
         if (!enemy.isDestroyed) {
-            enemy.move(player, enemies, barriers);
+            enemy.move(player, enemies, barriers, enemyBullets);
             enemy.draw(ctx);
             allEnemiesDestroyed = false; // At least one enemy is still active
         }
     });
 
-    // Check if all enemies are destroyed, and reset the game if true
+    // Check if all enemies are destroyed, and show the Game Over screen if true
     if (allEnemiesDestroyed) {
-        resetGame();
+        resetGame(); // Show Game Over modal when all enemies are destroyed
+        return;
     }
 
     requestAnimationFrame(gameLoop);
 }
 
-gameLoop();
+// Start the game
+initializeGame();
+requestAnimationFrame(gameLoop);

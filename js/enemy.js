@@ -5,20 +5,23 @@ class EnemyTank {
         this.color = color;
         this.width = 40;
         this.height = 40;
-        this.angle = Math.random() * Math.PI * 2;
+        this.angle = Math.random() * Math.PI * 2; // Body angle
+        this.turretAngle = Math.random() * Math.PI * 2; // Turret angle
         this.speed = 1.5;
         this.rotationSpeed = 0.03;
         this.targetAngle = this.angle;
         this.isDestroyed = false;
         this.isBackingUp = false;
         this.backupTime = 0;
+        this.shootCooldown = 100; // Cooldown to control shooting frequency
     }
 
-    move(player, enemies, barriers) {
+    // Move the enemy tank with collision detection
+    move(player, enemies, barriers, enemyBullets) {
         if (this.isBackingUp) {
-            this.backUp(); // Move backwards if backing up
+            this.backUp();
         } else {
-            // Rotate smoothly towards target angle
+            // Smoothly rotate towards target angle
             if (Math.abs(this.angle - this.targetAngle) > 0.01) {
                 this.angle += this.rotationSpeed * Math.sign(this.targetAngle - this.angle);
             }
@@ -26,7 +29,7 @@ class EnemyTank {
             const nextX = this.x + Math.cos(this.angle) * this.speed;
             const nextY = this.y + Math.sin(this.angle) * this.speed;
 
-            // Check if the enemy collides with another enemy, barriers, or boundaries
+            // Check for collisions with enemies, boundaries, and barriers
             if (!this.isCollidingWithEnemy(nextX, nextY, enemies) &&
                 this.isWithinBounds(nextX, nextY) &&
                 !this.isCollidingWithBarrier(nextX, nextY, barriers)) {
@@ -38,57 +41,77 @@ class EnemyTank {
                 this.backupTime = 20; // Back up for 20 frames
             }
 
-            // Update target angle towards the player after backing up
+            // Update turret angle to aim at the player
+            this.updateTurretAngle(player);
+
+            // Shoot bullets at the player
+            this.shoot(enemyBullets);
+
+            // Update target angle for future movement
             this.updateTargetAngle(player);
         }
     }
 
+    // Draw the enemy tank and its turret
     draw(ctx) {
         if (!this.isDestroyed) {
+            // Draw the tank body
             ctx.save();
             ctx.translate(this.x, this.y);
             ctx.rotate(this.angle);
             ctx.fillStyle = this.color;
             ctx.fillRect(-this.width / 2, -this.height / 2, this.width, this.height);
             ctx.restore();
+
+            // Draw the turret
+            this.drawTurret(ctx);
         }
     }
 
-    isWithinBounds(nextX, nextY) {
-        const margin = this.width / 2;
-        return nextX > margin && nextX < canvas.width - margin && nextY > margin && nextY < canvas.height - margin;
+    // Draw the turret on top of the enemy tank
+    drawTurret(ctx) {
+        ctx.save();
+        ctx.translate(this.x, this.y);
+        ctx.rotate(this.turretAngle); // Rotate turret independently from the body
+        ctx.fillStyle = 'darkgray';
+        ctx.fillRect(-5, -10, 30, 20); // Simple rectangle as the turret
+        ctx.restore();
     }
 
-    snapToBoundary() {
-        const margin = this.width / 2;
-        if (this.x < margin) this.x = margin;
-        if (this.x > canvas.width - margin) this.x = canvas.width - margin;
-        if (this.y < margin) this.y = margin;
-        if (this.y > canvas.height - margin) this.y = canvas.height - margin;
+    // Update the turret angle to aim at the player
+    updateTurretAngle(player) {
+        const dx = player.x - this.x;
+        const dy = player.y - this.y;
+        this.turretAngle = Math.atan2(dy, dx); // Aim turret at player
     }
 
-    isCollidingWithBarrier(nextX, nextY, barriers) {
-        for (const barrier of barriers) {
-            if (barrier.isCollidingWithTank({ x: nextX, y: nextY, width: this.width, height: this.height })) {
-                return true;
-            }
+    // Enemy tank shoots a bullet at the player
+    shoot(enemyBullets) {
+        if (this.shootCooldown <= 0) {
+            const bulletSpeed = 4;
+            const bulletX = this.x + Math.cos(this.turretAngle) * (this.width / 2);
+            const bulletY = this.y + Math.sin(this.turretAngle) * (this.height / 2);
+            const bullet = new EnemyBullet(bulletX, bulletY, this.turretAngle, bulletSpeed);
+            enemyBullets.push(bullet); // Add bullet to the array
+            this.shootCooldown = 100; // Reset cooldown after shooting
+        } else {
+            this.shootCooldown--; // Decrease cooldown
         }
-        return false;
     }
 
-    // Backup logic when hitting a barrier or boundary
+    // Method to handle backing up if the enemy hits an obstacle
     backUp() {
         this.x -= Math.cos(this.angle) * this.speed; // Move backward
         this.y -= Math.sin(this.angle) * this.speed;
         this.backupTime--;
 
         if (this.backupTime <= 0) {
-            // After backing up, rotate to a new random direction
-            this.targetAngle = this.angle + (Math.random() * Math.PI / 2 - Math.PI / 4); // Random small rotation
+            this.targetAngle = this.angle + (Math.random() * Math.PI / 2 - Math.PI / 4); // Rotate randomly
             this.isBackingUp = false; // Stop backing up
         }
     }
 
+    // Check if the tank will collide with another enemy
     isCollidingWithEnemy(nextX, nextY, enemies) {
         for (const enemy of enemies) {
             if (enemy !== this && !enemy.isDestroyed) {
@@ -97,15 +120,37 @@ class EnemyTank {
                 const distance = Math.sqrt(dx * dx + dy * dy);
                 const collisionDistance = this.width / 2 + enemy.width / 2;
                 if (distance < collisionDistance) {
-                    return true;
+                    return true; // Collision detected
                 }
             }
         }
-        return false;
+        return false; // No collision
     }
 
+    // Check if the tank is colliding with a barrier
+    isCollidingWithBarrier(nextX, nextY, barriers) {
+        for (const barrier of barriers) {
+            if (barrier.isCollidingWithTank({
+                x: nextX,
+                y: nextY,
+                width: this.width,
+                height: this.height
+            })) {
+                return true; // Collision detected
+            }
+        }
+        return false; // No collision
+    }
+
+    // Check if the tank is within the canvas boundaries
+    isWithinBounds(nextX, nextY) {
+        const margin = this.width / 2;
+        return nextX > margin && nextX < canvas.width - margin && nextY > margin && nextY < canvas.height - margin;
+    }
+
+    // Update target angle based on player's position (with some randomness)
     updateTargetAngle(player) {
-        const influenceFactor = 0.25; // Influence towards the player
+        const influenceFactor = 0.25; // How much the tank should follow the player
         const dx = player.x - this.x;
         const dy = player.y - this.y;
         const angleToPlayer = Math.atan2(dy, dx);
