@@ -4,6 +4,12 @@ const gameOverModal = document.getElementById('gameOverModal');
 const gameOverOverlay = document.getElementById('gameOverOverlay');
 const resetButton = document.getElementById('resetButton');
 
+// Function to set the canvas size to match the window size
+function resizeCanvas() {
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+}
+
 // Initialize player, enemy tanks, bullets, and barriers
 let player;
 let bullets;
@@ -14,7 +20,8 @@ let isGameOver = false; // Track whether the game is over
 
 // Function to initialize or reset the game
 function initializeGame() {
-    player = new PlayerTank(400, 300, 'blue');
+    resizeCanvas(); // Ensure the canvas matches the window size
+    player = new PlayerTank(canvas.width / 2, canvas.height / 2, 'blue');
     bullets = []; // Array to store active bullets
     enemies = []; // Array to store enemy tanks
     barriers = []; // Array to store barriers
@@ -168,3 +175,6 @@ function gameLoop() {
 // Start the game
 initializeGame();
 requestAnimationFrame(gameLoop);
+
+// Add an event listener to resize the canvas when the window is resized
+window.addEventListener('resize', resizeCanvas);
