@@ -1,7 +1,7 @@
 const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
 
-// Tank class with turret and front indicator
+// Tank class with boundary collision detection
 class Tank {
     constructor(x, y, color) {
         this.x = x;
@@ -50,14 +50,37 @@ class Tank {
         ctx.stroke();
     }
 
+    // Move forward with boundary collision detection
     moveForward() {
-        this.x += Math.cos(this.angle) * this.speed;
-        this.y += Math.sin(this.angle) * this.speed;
+        const nextX = this.x + Math.cos(this.angle) * this.speed;
+        const nextY = this.y + Math.sin(this.angle) * this.speed;
+
+        if (this.isWithinBounds(nextX, nextY)) {
+            this.x = nextX;
+            this.y = nextY;
+        }
     }
 
+    // Move backward with boundary collision detection
     moveBackward() {
-        this.x -= Math.cos(this.angle) * this.speed;
-        this.y -= Math.sin(this.angle) * this.speed;
+        const nextX = this.x - Math.cos(this.angle) * this.speed;
+        const nextY = this.y - Math.sin(this.angle) * this.speed;
+
+        if (this.isWithinBounds(nextX, nextY)) {
+            this.x = nextX;
+            this.y = nextY;
+        }
+    }
+
+    // Check if the tank is within the canvas boundaries
+    isWithinBounds(nextX, nextY) {
+        const margin = this.width / 2; // Half of the tank's width as a margin
+        return (
+            nextX > margin &&
+            nextX < canvas.width - margin &&
+            nextY > margin &&
+            nextY < canvas.height - margin
+        );
     }
 
     rotateLeft() {
