@@ -144,14 +144,28 @@ class EnemyTank {
         this.x += Math.cos(this.angle) * this.speed;
         this.y += Math.sin(this.angle) * this.speed;
 
-        // Check for boundary collision and set new target angle
-        if (this.x < 0 || this.x > canvas.width || this.y < 0 || this.y > canvas.height) {
-            this.targetAngle = Math.random() * Math.PI * 2; // New random direction
+        // Handle boundary collisions by changing direction
+        this.checkBoundaryCollision();
+    }
+
+    // Boundary check and direction change
+    checkBoundaryCollision() {
+        const margin = 20; // Margin to avoid corners
+        if (this.x < margin) {
+            this.x = margin;
+            this.targetAngle = Math.random() * Math.PI; // Change to a random angle away from the edge
+        } else if (this.x > canvas.width - margin) {
+            this.x = canvas.width - margin;
+            this.targetAngle = Math.PI + Math.random() * Math.PI; // Change to a random angle away from the edge
         }
 
-        // Ensure the enemy stays within the canvas bounds
-        this.x = Math.max(0, Math.min(this.x, canvas.width));
-        this.y = Math.max(0, Math.min(this.y, canvas.height));
+        if (this.y < margin) {
+            this.y = margin;
+            this.targetAngle = Math.random() * Math.PI * 2; // Change to a random angle away from the edge
+        } else if (this.y > canvas.height - margin) {
+            this.y = canvas.height - margin;
+            this.targetAngle = Math.random() * Math.PI * 2; // Change to a random angle away from the edge
+        }
     }
 
     // Draw the enemy tank
