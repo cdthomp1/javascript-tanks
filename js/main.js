@@ -85,7 +85,7 @@ function gameLoop() {
         bullet.draw(ctx);
 
         // Check for ricochet and remove bullet if needed
-        if (bullet.ricochetIfNeeded(canvas)) {
+        if (bullet.ricochetIfNeeded(canvas, barriers)) {
             bullets.splice(i, 1); // Remove the bullet if it should be destroyed
             continue; // Skip further checks for this bullet
         }

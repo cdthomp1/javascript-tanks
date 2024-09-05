@@ -21,33 +21,51 @@ class Bullet {
         ctx.closePath();
     }
 
+    // Ricochet logic for canvas boundaries and walls
+    ricochetIfNeeded(canvas, barriers) {
+        // Check if bullet hits the canvas boundaries (left or right)
+        if (this.x - this.radius <= 0 || this.x + this.radius >= canvas.width) {
+            if (!this.ricocheted) {
+                this.angle = Math.PI - this.angle; // Reflect horizontally
+                this.ricocheted = true; // Mark bullet as ricocheted
+            } else {
+                return true; // Destroy the bullet after the second collision
+            }
+        }
+
+        // Check if bullet hits the canvas boundaries (top or bottom)
+        if (this.y - this.radius <= 0 || this.y + this.radius >= canvas.height) {
+            if (!this.ricocheted) {
+                this.angle = -this.angle; // Reflect vertically
+                this.ricocheted = true; // Mark bullet as ricocheted
+            } else {
+                return true; // Destroy the bullet after the second collision
+            }
+        }
+
+        // Check if bullet hits a barrier
+        for (const barrier of barriers) {
+            if (barrier.isCollidingWithBullet(this)) {
+                if (!this.ricocheted) {
+                    // Handle ricochet based on which side of the barrier the bullet hits
+                    if (this.x > barrier.x && this.x < barrier.x + barrier.width) {
+                        this.angle = -this.angle; // Vertical reflection
+                    } else {
+                        this.angle = Math.PI - this.angle; // Horizontal reflection
+                    }
+                    this.ricocheted = true; // Mark bullet as ricocheted
+                } else {
+                    return true; // Destroy the bullet after the second collision
+                }
+            }
+        }
+
+        return false; // Bullet is not destroyed
+    }
+
     // Check if the bullet is out of bounds (off the canvas)
     isOutOfBounds(canvas) {
         return this.x < 0 || this.x > canvas.width || this.y < 0 || this.y > canvas.height;
-    }
-
-    // Ricochet logic
-    ricochetIfNeeded(canvas) {
-        // Check for wall collisions
-        if (this.x - this.radius <= 0 || this.x + this.radius >= canvas.width) {
-            // Horizontal wall collision (left or right)
-            if (!this.ricocheted) {
-                this.angle = Math.PI - this.angle; // Reverse horizontal direction
-                this.ricocheted = true; // Mark bullet as ricocheted
-            } else {
-                return true; // Bullet should be destroyed after second collision
-            }
-        }
-        if (this.y - this.radius <= 0 || this.y + this.radius >= canvas.height) {
-            // Vertical wall collision (top or bottom)
-            if (!this.ricocheted) {
-                this.angle = -this.angle; // Reverse vertical direction
-                this.ricocheted = true; // Mark bullet as ricocheted
-            } else {
-                return true; // Bullet should be destroyed after second collision
-            }
-        }
-        return false; // Bullet should not be destroyed
     }
 
     // Check if the bullet is colliding with a tank (player or enemy)

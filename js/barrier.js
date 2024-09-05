@@ -32,4 +32,24 @@ class Barrier {
             tankTop < barrierBottom
         );
     }
+
+    // Check if the bullet is colliding with the barrier
+    isCollidingWithBullet(bullet) {
+        const bulletLeft = bullet.x - bullet.radius;
+        const bulletRight = bullet.x + bullet.radius;
+        const bulletTop = bullet.y - bullet.radius;
+        const bulletBottom = bullet.y + bullet.radius;
+
+        const barrierLeft = this.x;
+        const barrierRight = this.x + this.width;
+        const barrierTop = this.y;
+        const barrierBottom = this.y + this.height;
+
+        return (
+            bulletRight > barrierLeft &&
+            bulletLeft < barrierRight &&
+            bulletBottom > barrierTop &&
+            bulletTop < barrierBottom
+        );
+    }
 }
