@@ -74,10 +74,51 @@ class Tank {
         let dy = mouseY - this.y;
         this.turretAngle = Math.atan2(dy, dx);
     }
+
+    // Shoot a bullet from the turret
+    shoot() {
+        const bulletSpeed = 5;
+        const bulletX = this.x + Math.cos(this.turretAngle) * (this.width / 2);
+        const bulletY = this.y + Math.sin(this.turretAngle) * (this.height / 2);
+        const bullet = new Bullet(bulletX, bulletY, this.turretAngle, bulletSpeed);
+        bullets.push(bullet); // Add bullet to the list of bullets
+    }
+}
+
+// Bullet class
+class Bullet {
+    constructor(x, y, angle, speed) {
+        this.x = x;
+        this.y = y;
+        this.angle = angle;
+        this.speed = speed;
+        this.radius = 5; // Bullet size
+    }
+
+    // Move the bullet in the direction of the turret
+    move() {
+        this.x += Math.cos(this.angle) * this.speed;
+        this.y += Math.sin(this.angle) * this.speed;
+    }
+
+    // Draw the bullet on the canvas
+    draw() {
+        ctx.beginPath();
+        ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+        ctx.fillStyle = 'black';
+        ctx.fill();
+        ctx.closePath();
+    }
+
+    // Check if the bullet is out of bounds (off the canvas)
+    isOutOfBounds() {
+        return this.x < 0 || this.x > canvas.width || this.y < 0 || this.y > canvas.height;
+    }
 }
 
 // Player tank
 const player = new Tank(400, 300, 'blue');
+const bullets = []; // Array to store active bullets
 
 // Controls
 const keys = {};
@@ -98,6 +139,11 @@ canvas.addEventListener('mousemove', (e) => {
     player.updateTurretAngle(mouseX, mouseY);
 });
 
+// Mouse click to fire a bullet
+canvas.addEventListener('click', () => {
+    player.shoot(); // Fire bullet from turret
+});
+
 // Game loop
 function gameLoop() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -110,6 +156,18 @@ function gameLoop() {
 
     // Draw the player tank and its turret
     player.draw();
+
+    // Move and draw bullets
+    for (let i = bullets.length - 1; i >= 0; i--) {
+        const bullet = bullets[i];
+        bullet.move();
+        bullet.draw();
+
+        // Remove bullet if it goes out of bounds
+        if (bullet.isOutOfBounds()) {
+            bullets.splice(i, 1); // Remove bullet from array
+        }
+    }
 
     requestAnimationFrame(gameLoop);
 }
