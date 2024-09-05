@@ -125,6 +125,26 @@ class EnemyTank {
         this.width = 40;
         this.height = 40;
         this.isDestroyed = false;
+        this.speed = 1.5;
+        this.direction = Math.random() * Math.PI * 2; // Random initial direction
+    }
+
+    // Move the enemy tank in a random direction
+    move() {
+        this.x += Math.cos(this.direction) * this.speed;
+        this.y += Math.sin(this.direction) * this.speed;
+
+        // Check for boundary collision and change direction
+        if (this.x < 0 || this.x > canvas.width) {
+            this.direction = Math.PI - this.direction; // Reverse horizontal direction
+        }
+        if (this.y < 0 || this.y > canvas.height) {
+            this.direction = -this.direction; // Reverse vertical direction
+        }
+
+        // Ensure the enemy stays within the canvas bounds
+        this.x = Math.max(0, Math.min(this.x, canvas.width));
+        this.y = Math.max(0, Math.min(this.y, canvas.height));
     }
 
     // Draw the enemy tank
@@ -207,8 +227,9 @@ function gameLoop() {
         }
     }
 
-    // Draw enemies
+    // Move and draw enemies
     enemies.forEach(enemy => {
+        enemy.move();
         enemy.draw();
     });
 
