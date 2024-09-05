@@ -2,15 +2,25 @@ const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
 
 // Initialize player and enemy tanks
-const player = new PlayerTank(400, 300, 'blue');
-const bullets = []; // Array to store active bullets
-const enemies = []; // Array to store enemy tanks
+let player;
+let bullets;
+let enemies;
 
-// Create a few enemy tanks
-for (let i = 0; i < 3; i++) {
-    const enemy = new EnemyTank(Math.random() * canvas.width, Math.random() * canvas.height);
-    enemies.push(enemy);
+// Function to initialize or reset the game
+function initializeGame() {
+    player = new PlayerTank(400, 300, 'blue');
+    bullets = []; // Array to store active bullets
+    enemies = []; // Array to store enemy tanks
+
+    // Create a few enemy tanks
+    for (let i = 0; i < 3; i++) {
+        const enemy = new EnemyTank(Math.random() * canvas.width, Math.random() * canvas.height);
+        enemies.push(enemy);
+    }
 }
+
+// Initialize the game for the first time
+initializeGame();
 
 // Controls
 const keys = {};
@@ -35,6 +45,13 @@ canvas.addEventListener('mousemove', (e) => {
 canvas.addEventListener('click', () => {
     player.shoot(bullets); // Fire bullet from turret
 });
+
+// Function to reset the game after all enemies are destroyed
+function resetGame() {
+    setTimeout(() => {
+        initializeGame(); // Reset the game after a short delay
+    }, 1000); // 1 second delay before resetting the game
+}
 
 // Game loop
 function gameLoop() {
@@ -73,10 +90,19 @@ function gameLoop() {
     }
 
     // Move and draw enemies
+    let allEnemiesDestroyed = true;
     enemies.forEach(enemy => {
-        enemy.move(player, enemies);
-        enemy.draw(ctx);
+        if (!enemy.isDestroyed) {
+            enemy.move(player, enemies);
+            enemy.draw(ctx);
+            allEnemiesDestroyed = false; // At least one enemy is still active
+        }
     });
+
+    // Check if all enemies are destroyed, and reset the game if true
+    if (allEnemiesDestroyed) {
+        resetGame();
+    }
 
     requestAnimationFrame(gameLoop);
 }
