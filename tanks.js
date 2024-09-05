@@ -1,7 +1,7 @@
 const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
 
-// Tank class with turret
+// Tank class with turret and front indicator
 class Tank {
     constructor(x, y, color) {
         this.x = x;
@@ -21,6 +21,10 @@ class Tank {
         ctx.rotate(this.angle);
         ctx.fillStyle = this.color;
         ctx.fillRect(-this.width / 2, -this.height / 2, this.width, this.height);
+
+        // Draw the front indicator
+        this.drawFrontIndicator();
+
         ctx.restore();
 
         // Draw the turret
@@ -34,6 +38,16 @@ class Tank {
         ctx.fillStyle = 'darkgray';
         ctx.fillRect(-5, -10, 30, 20); // Simple rectangle as turret
         ctx.restore();
+    }
+
+    drawFrontIndicator() {
+        // Draw a small line to indicate the front of the tank
+        ctx.strokeStyle = 'red';  // Set color of the indicator
+        ctx.lineWidth = 2;        // Thickness of the indicator line
+        ctx.beginPath();
+        ctx.moveTo(0, 0);         // Start at the center of the tank
+        ctx.lineTo(this.width / 2 + 10, 0); // Draw a line extending in front of the tank
+        ctx.stroke();
     }
 
     moveForward() {
