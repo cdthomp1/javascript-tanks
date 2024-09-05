@@ -18,6 +18,7 @@ class EnemyTank {
         if (this.isBackingUp) {
             this.backUp();
         } else {
+            // Smoothly rotate towards target angle
             if (Math.abs(this.angle - this.targetAngle) > 0.01) {
                 this.angle += this.rotationSpeed * Math.sign(this.targetAngle - this.angle);
             }
@@ -25,12 +26,15 @@ class EnemyTank {
             const nextX = this.x + Math.cos(this.angle) * this.speed;
             const nextY = this.y + Math.sin(this.angle) * this.speed;
 
-            if (!this.isCollidingWithEnemy(nextX, nextY, enemies)) {
+            // Check for enemy collisions and boundaries
+            if (!this.isCollidingWithEnemy(nextX, nextY, enemies) && this.isWithinBounds(nextX, nextY)) {
                 this.x = nextX;
                 this.y = nextY;
+            } else {
+                this.snapToBoundary();  // Prevent going beyond boundaries
             }
 
-            this.checkBoundaryCollision();
+            // Update the target angle to move towards the player
             this.updateTargetAngle(player);
         }
     }
@@ -46,22 +50,18 @@ class EnemyTank {
         }
     }
 
-    backUp() {
-        this.x -= Math.cos(this.angle) * this.speed;
-        this.y -= Math.sin(this.angle) * this.speed;
-        this.backupTime--;
-        if (this.backupTime <= 0) {
-            this.targetAngle = this.angle + (Math.random() * Math.PI / 2 - Math.PI / 4);
-            this.isBackingUp = false;
-        }
+    isWithinBounds(nextX, nextY) {
+        const margin = this.width / 2;
+        return nextX > margin && nextX < canvas.width - margin && nextY > margin && nextY < canvas.height - margin;
     }
 
-    checkBoundaryCollision() {
-        const margin = 20;
-        if (this.x < margin || this.x > canvas.width - margin || this.y < margin || this.y > canvas.height - margin) {
-            this.isBackingUp = true;
-            this.backupTime = 20;
-        }
+    snapToBoundary() {
+        // Ensure the enemy is snapped back to the nearest boundary if it moves out of bounds
+        const margin = this.width / 2;
+        if (this.x < margin) this.x = margin;
+        if (this.x > canvas.width - margin) this.x = canvas.width - margin;
+        if (this.y < margin) this.y = margin;
+        if (this.y > canvas.height - margin) this.y = canvas.height - margin;
     }
 
     isCollidingWithEnemy(nextX, nextY, enemies) {
@@ -86,5 +86,16 @@ class EnemyTank {
         const angleToPlayer = Math.atan2(dy, dx);
         const randomAngle = this.angle + (Math.random() * Math.PI / 2 - Math.PI / 4);
         this.targetAngle = (1 - influenceFactor) * randomAngle + influenceFactor * angleToPlayer;
+    }
+
+    backUp() {
+        this.x -= Math.cos(this.angle) * this.speed;
+        this.y -= Math.sin(this.angle) * this.speed;
+        this.backupTime--;
+
+        if (this.backupTime <= 0) {
+            this.targetAngle = this.angle + (Math.random() * Math.PI / 2 - Math.PI / 4);
+            this.isBackingUp = false;
+        }
     }
 }

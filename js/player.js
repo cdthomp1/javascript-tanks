@@ -42,18 +42,24 @@ class PlayerTank {
     moveForward(enemies) {
         const nextX = this.x + Math.cos(this.angle) * this.speed;
         const nextY = this.y + Math.sin(this.angle) * this.speed;
+
         if (this.isWithinBounds(nextX, nextY) && !this.isCollidingWithEnemy(nextX, nextY, enemies)) {
             this.x = nextX;
             this.y = nextY;
+        } else {
+            this.snapToBoundary();  // Ensure the tank doesn't go beyond the boundary
         }
     }
 
     moveBackward(enemies) {
         const nextX = this.x - Math.cos(this.angle) * this.speed;
         const nextY = this.y - Math.sin(this.angle) * this.speed;
+
         if (this.isWithinBounds(nextX, nextY) && !this.isCollidingWithEnemy(nextX, nextY, enemies)) {
             this.x = nextX;
             this.y = nextY;
+        } else {
+            this.snapToBoundary();  // Ensure the tank doesn't go beyond the boundary
         }
     }
 
@@ -82,6 +88,15 @@ class PlayerTank {
     isWithinBounds(nextX, nextY) {
         const margin = this.width / 2;
         return nextX > margin && nextX < canvas.width - margin && nextY > margin && nextY < canvas.height - margin;
+    }
+
+    snapToBoundary() {
+        // Ensure the player is snapped back to the nearest boundary when they move out of bounds
+        const margin = this.width / 2;
+        if (this.x < margin) this.x = margin;
+        if (this.x > canvas.width - margin) this.x = canvas.width - margin;
+        if (this.y < margin) this.y = margin;
+        if (this.y > canvas.height - margin) this.y = canvas.height - margin;
     }
 
     isCollidingWithEnemy(nextX, nextY, enemies) {
