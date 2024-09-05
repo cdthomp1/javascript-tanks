@@ -116,9 +116,47 @@ class Bullet {
     }
 }
 
+// Enemy class
+class EnemyTank {
+    constructor(x, y, color = 'green') {
+        this.x = x;
+        this.y = y;
+        this.color = color;
+        this.width = 40;
+        this.height = 40;
+        this.isDestroyed = false;
+    }
+
+    // Draw the enemy tank
+    draw() {
+        if (!this.isDestroyed) {
+            ctx.save();
+            ctx.translate(this.x, this.y);
+            ctx.fillStyle = this.color;
+            ctx.fillRect(-this.width / 2, -this.height / 2, this.width, this.height);
+            ctx.restore();
+        }
+    }
+
+    // Check for collision with a bullet
+    checkCollision(bullet) {
+        const dx = this.x - bullet.x;
+        const dy = this.y - bullet.y;
+        const distance = Math.sqrt(dx * dx + dy * dy);
+        return distance < this.width / 2 + bullet.radius;
+    }
+}
+
 // Player tank
 const player = new Tank(400, 300, 'blue');
 const bullets = []; // Array to store active bullets
+const enemies = []; // Array to store enemy tanks
+
+// Create a few enemy tanks
+for (let i = 0; i < 3; i++) {
+    const enemy = new EnemyTank(Math.random() * canvas.width, Math.random() * canvas.height);
+    enemies.push(enemy);
+}
 
 // Controls
 const keys = {};
@@ -168,6 +206,22 @@ function gameLoop() {
             bullets.splice(i, 1); // Remove bullet from array
         }
     }
+
+    // Draw enemies
+    enemies.forEach(enemy => {
+        enemy.draw();
+    });
+
+    // Check for collisions between bullets and enemies
+    bullets.forEach((bullet, bulletIndex) => {
+        enemies.forEach((enemy, enemyIndex) => {
+            if (!enemy.isDestroyed && enemy.checkCollision(bullet)) {
+                // Destroy the bullet and the enemy
+                bullets.splice(bulletIndex, 1); // Remove bullet
+                enemy.isDestroyed = true; // Destroy enemy
+            }
+        });
+    });
 
     requestAnimationFrame(gameLoop);
 }
