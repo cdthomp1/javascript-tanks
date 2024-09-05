@@ -4,6 +4,8 @@ const gameOverModal = document.getElementById('gameOverModal');
 const gameOverOverlay = document.getElementById('gameOverOverlay');
 const resetButton = document.getElementById('resetButton');
 
+const barrierCount = 5; // Number of barriers
+
 // Function to set the canvas size to match the window size
 function resizeCanvas() {
     canvas.width = window.innerWidth;
@@ -17,6 +19,18 @@ let enemies;
 let barriers;
 let enemyBullets; // Array to store enemy bullets
 let isGameOver = false; // Track whether the game is over
+
+// Function to create a randomized barrier position
+function createRandomBarrier() {
+    const barrierWidth = 100; // Fixed width of the barriers
+    const barrierHeight = 50; // Fixed height of the barriers
+
+    // Ensure the barrier doesn't go out of bounds
+    const x = Math.random() * (canvas.width - barrierWidth);
+    const y = Math.random() * (canvas.height - barrierHeight);
+
+    return new Barrier(x, y, barrierWidth, barrierHeight, 'gray');
+}
 
 // Function to initialize or reset the game
 function initializeGame() {
@@ -33,10 +47,10 @@ function initializeGame() {
         enemies.push(enemy);
     }
 
-    // Create some barriers (x, y, width, height)
-    barriers.push(new Barrier(200, 150, 100, 50, 'gray'));
-    barriers.push(new Barrier(500, 350, 150, 50, 'gray'));
-    barriers.push(new Barrier(300, 100, 50, 200, 'gray'));
+    // Randomly create barriers
+    for (let i = 0; i < barrierCount; i++) {
+        barriers.push(createRandomBarrier());
+    }
 
     hideGameOver(); // Hide game over modal when initializing the game
     isGameOver = false; // Reset the game state
