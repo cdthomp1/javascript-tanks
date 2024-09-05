@@ -1,7 +1,7 @@
 const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
 
-// Tank class with boundary collision detection
+// Tank class with boundary and enemy collision detection
 class Tank {
     constructor(x, y, color) {
         this.x = x;
@@ -50,23 +50,23 @@ class Tank {
         ctx.stroke();
     }
 
-    // Move forward with boundary collision detection
-    moveForward() {
+    // Move forward with boundary and enemy collision detection
+    moveForward(enemies) {
         const nextX = this.x + Math.cos(this.angle) * this.speed;
         const nextY = this.y + Math.sin(this.angle) * this.speed;
 
-        if (this.isWithinBounds(nextX, nextY)) {
+        if (this.isWithinBounds(nextX, nextY) && !this.isCollidingWithEnemy(nextX, nextY, enemies)) {
             this.x = nextX;
             this.y = nextY;
         }
     }
 
-    // Move backward with boundary collision detection
-    moveBackward() {
+    // Move backward with boundary and enemy collision detection
+    moveBackward(enemies) {
         const nextX = this.x - Math.cos(this.angle) * this.speed;
         const nextY = this.y - Math.sin(this.angle) * this.speed;
 
-        if (this.isWithinBounds(nextX, nextY)) {
+        if (this.isWithinBounds(nextX, nextY) && !this.isCollidingWithEnemy(nextX, nextY, enemies)) {
             this.x = nextX;
             this.y = nextY;
         }
@@ -81,6 +81,23 @@ class Tank {
             nextY > margin &&
             nextY < canvas.height - margin
         );
+    }
+
+    // Check if the player is colliding with any enemy
+    isCollidingWithEnemy(nextX, nextY, enemies) {
+        for (let i = 0; i < enemies.length; i++) {
+            const enemy = enemies[i];
+            if (!enemy.isDestroyed) {
+                const dx = nextX - enemy.x;
+                const dy = nextY - enemy.y;
+                const distance = Math.sqrt(dx * dx + dy * dy);
+                const collisionDistance = this.width / 2 + enemy.width / 2; // Sum of the radii
+                if (distance < collisionDistance) {
+                    return true; // Collision detected
+                }
+            }
+        }
+        return false;
     }
 
     rotateLeft() {
@@ -277,8 +294,8 @@ function gameLoop() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
     // Handle controls
-    if (keys['w']) player.moveForward();
-    if (keys['s']) player.moveBackward();
+    if (keys['w']) player.moveForward(enemies);
+    if (keys['s']) player.moveBackward(enemies);
     if (keys['a']) player.rotateLeft();
     if (keys['d']) player.rotateRight();
 
