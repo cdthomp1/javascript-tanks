@@ -85,10 +85,10 @@ function gameLoop() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
     // Handle controls
-    if (keys['ArrowUp']) player.moveForward();
-    if (keys['ArrowDown']) player.moveBackward();
-    if (keys['ArrowLeft']) player.rotateLeft();
-    if (keys['ArrowRight']) player.rotateRight();
+    if (keys['w']) player.moveForward();
+    if (keys['s']) player.moveBackward();
+    if (keys['a']) player.rotateLeft();
+    if (keys['d']) player.rotateRight();
 
     // Draw the player tank and its turret
     player.draw();
