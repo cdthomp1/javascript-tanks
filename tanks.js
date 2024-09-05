@@ -87,7 +87,7 @@ class Tank {
     isCollidingWithEnemy(nextX, nextY, enemies) {
         for (let i = 0; i < enemies.length; i++) {
             const enemy = enemies[i];
-            if (!enemy.isDestroyed) {
+            if (!enemy.isDestroyed && enemy !== this) {
                 const dx = nextX - enemy.x;
                 const dy = nextY - enemy.y;
                 const distance = Math.sqrt(dx * dx + dy * dy);
@@ -156,7 +156,7 @@ class Bullet {
     }
 }
 
-// Enemy class with player-influenced movement
+// Enemy class with player and enemy-influenced movement
 class EnemyTank {
     constructor(x, y, color = 'green') {
         this.x = x;
@@ -174,7 +174,7 @@ class EnemyTank {
     }
 
     // Move the enemy tank forward or backward
-    move(player) {
+    move(player, enemies) {
         if (this.isBackingUp) {
             // Back up for a short duration
             this.backUp();
@@ -184,9 +184,16 @@ class EnemyTank {
                 this.angle += this.rotationSpeed * Math.sign(this.targetAngle - this.angle);
             }
 
-            // Move forward in the direction of the angle
-            this.x += Math.cos(this.angle) * this.speed;
-            this.y += Math.sin(this.angle) * this.speed;
+            // Calculate the next position
+            const nextX = this.x + Math.cos(this.angle) * this.speed;
+            const nextY = this.y + Math.sin(this.angle) * this.speed;
+
+            // Check for enemy collisions
+            if (!this.isCollidingWithEnemy(nextX, nextY, enemies)) {
+                // Move forward in the direction of the angle
+                this.x = nextX;
+                this.y = nextY;
+            }
 
             // Handle boundary collisions by backing up and changing direction
             this.checkBoundaryCollision();
@@ -217,6 +224,23 @@ class EnemyTank {
             this.isBackingUp = true;
             this.backupTime = 20; // Back up for a few frames
         }
+    }
+
+    // Check for enemy collision
+    isCollidingWithEnemy(nextX, nextY, enemies) {
+        for (let i = 0; i < enemies.length; i++) {
+            const enemy = enemies[i];
+            if (enemy !== this && !enemy.isDestroyed) {
+                const dx = nextX - enemy.x;
+                const dy = nextY - enemy.y;
+                const distance = Math.sqrt(dx * dx + dy * dy);
+                const collisionDistance = this.width / 2 + enemy.width / 2; // Sum of the radii
+                if (distance < collisionDistance) {
+                    return true; // Collision detected
+                }
+            }
+        }
+        return false;
     }
 
     // Update target angle based on player position with a weighted influence
@@ -316,7 +340,7 @@ function gameLoop() {
 
     // Move and draw enemies
     enemies.forEach(enemy => {
-        enemy.move(player);
+        enemy.move(player, enemies);
         enemy.draw();
     });
 
