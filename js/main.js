@@ -55,6 +55,12 @@ function gameLoop() {
         bullet.move();
         bullet.draw(ctx);
 
+        // Check for ricochet and remove bullet if needed
+        if (bullet.ricochetIfNeeded(canvas)) {
+            bullets.splice(i, 1); // Remove the bullet if it should be destroyed
+            continue; // Skip further checks for this bullet
+        }
+
         // Check for bullet-enemy collisions
         for (let j = enemies.length - 1; j >= 0; j--) {
             const enemy = enemies[j];
@@ -63,11 +69,6 @@ function gameLoop() {
                 bullets.splice(i, 1); // Remove the bullet
                 break; // Break out of the inner loop once the bullet is removed
             }
-        }
-
-        // Remove bullet if it goes out of bounds
-        if (bullet.isOutOfBounds(canvas)) {
-            bullets.splice(i, 1); // Remove bullet from array
         }
     }
 
