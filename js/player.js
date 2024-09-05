@@ -39,27 +39,35 @@ class PlayerTank {
         ctx.stroke();
     }
 
-    moveForward(enemies) {
+    moveForward(enemies, barriers) {
         const nextX = this.x + Math.cos(this.angle) * this.speed;
         const nextY = this.y + Math.sin(this.angle) * this.speed;
 
-        if (this.isWithinBounds(nextX, nextY) && !this.isCollidingWithEnemy(nextX, nextY, enemies)) {
+        if (
+            this.isWithinBounds(nextX, nextY) &&
+            !this.isCollidingWithEnemy(nextX, nextY, enemies) &&
+            !this.isCollidingWithBarrier(nextX, nextY, barriers)
+        ) {
             this.x = nextX;
             this.y = nextY;
         } else {
-            this.snapToBoundary();  // Ensure the tank doesn't go beyond the boundary
+            this.snapToBoundary(); // Ensure the player doesn't go beyond the boundary
         }
     }
 
-    moveBackward(enemies) {
+    moveBackward(enemies, barriers) {
         const nextX = this.x - Math.cos(this.angle) * this.speed;
         const nextY = this.y - Math.sin(this.angle) * this.speed;
 
-        if (this.isWithinBounds(nextX, nextY) && !this.isCollidingWithEnemy(nextX, nextY, enemies)) {
+        if (
+            this.isWithinBounds(nextX, nextY) &&
+            !this.isCollidingWithEnemy(nextX, nextY, enemies) &&
+            !this.isCollidingWithBarrier(nextX, nextY, barriers)
+        ) {
             this.x = nextX;
             this.y = nextY;
         } else {
-            this.snapToBoundary();  // Ensure the tank doesn't go beyond the boundary
+            this.snapToBoundary(); // Ensure the player doesn't go beyond the boundary
         }
     }
 
@@ -109,6 +117,16 @@ class PlayerTank {
                 if (distance < collisionDistance) {
                     return true;
                 }
+            }
+        }
+        return false;
+    }
+
+    // Check if the tank is colliding with any barrier
+    isCollidingWithBarrier(nextX, nextY, barriers) {
+        for (const barrier of barriers) {
+            if (barrier.isCollidingWithTank({ x: nextX, y: nextY, width: this.width, height: this.height })) {
+                return true;
             }
         }
         return false;

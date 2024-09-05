@@ -1,22 +1,29 @@
 const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
 
-// Initialize player and enemy tanks
+// Initialize player, enemy tanks, and barriers
 let player;
 let bullets;
 let enemies;
+let barriers; // Array to store barriers
 
 // Function to initialize or reset the game
 function initializeGame() {
     player = new PlayerTank(400, 300, 'blue');
     bullets = []; // Array to store active bullets
     enemies = []; // Array to store enemy tanks
+    barriers = []; // Array to store barriers
 
     // Create a few enemy tanks
     for (let i = 0; i < 3; i++) {
         const enemy = new EnemyTank(Math.random() * canvas.width, Math.random() * canvas.height);
         enemies.push(enemy);
     }
+
+    // Create some barriers (x, y, width, height)
+    barriers.push(new Barrier(200, 150, 100, 50, 'gray'));
+    barriers.push(new Barrier(500, 350, 150, 50, 'gray'));
+    barriers.push(new Barrier(300, 100, 50, 200, 'gray'));
 }
 
 // Initialize the game for the first time
@@ -57,9 +64,14 @@ function resetGame() {
 function gameLoop() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
+    // Draw the barriers
+    barriers.forEach(barrier => {
+        barrier.draw(ctx);
+    });
+
     // Handle controls
-    if (keys['w']) player.moveForward(enemies);
-    if (keys['s']) player.moveBackward(enemies);
+    if (keys['w']) player.moveForward(enemies, barriers);
+    if (keys['s']) player.moveBackward(enemies, barriers);
     if (keys['a']) player.rotateLeft();
     if (keys['d']) player.rotateRight();
 
@@ -93,7 +105,7 @@ function gameLoop() {
     let allEnemiesDestroyed = true;
     enemies.forEach(enemy => {
         if (!enemy.isDestroyed) {
-            enemy.move(player, enemies);
+            enemy.move(player, enemies, barriers);
             enemy.draw(ctx);
             allEnemiesDestroyed = false; // At least one enemy is still active
         }

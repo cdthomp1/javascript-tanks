@@ -14,11 +14,10 @@ class EnemyTank {
         this.backupTime = 0;
     }
 
-    move(player, enemies) {
+    move(player, enemies, barriers) {
         if (this.isBackingUp) {
             this.backUp();
         } else {
-            // Smoothly rotate towards target angle
             if (Math.abs(this.angle - this.targetAngle) > 0.01) {
                 this.angle += this.rotationSpeed * Math.sign(this.targetAngle - this.angle);
             }
@@ -26,15 +25,17 @@ class EnemyTank {
             const nextX = this.x + Math.cos(this.angle) * this.speed;
             const nextY = this.y + Math.sin(this.angle) * this.speed;
 
-            // Check for enemy collisions and boundaries
-            if (!this.isCollidingWithEnemy(nextX, nextY, enemies) && this.isWithinBounds(nextX, nextY)) {
+            if (
+                !this.isCollidingWithEnemy(nextX, nextY, enemies) &&
+                this.isWithinBounds(nextX, nextY) &&
+                !this.isCollidingWithBarrier(nextX, nextY, barriers)
+            ) {
                 this.x = nextX;
                 this.y = nextY;
             } else {
-                this.snapToBoundary();  // Prevent going beyond boundaries
+                this.snapToBoundary();
             }
 
-            // Update the target angle to move towards the player
             this.updateTargetAngle(player);
         }
     }
@@ -74,6 +75,16 @@ class EnemyTank {
                 if (distance < collisionDistance) {
                     return true;
                 }
+            }
+        }
+        return false;
+    }
+
+    // Check if the enemy tank is colliding with any barrier
+    isCollidingWithBarrier(nextX, nextY, barriers) {
+        for (const barrier of barriers) {
+            if (barrier.isCollidingWithTank({ x: nextX, y: nextY, width: this.width, height: this.height })) {
+                return true;
             }
         }
         return false;
