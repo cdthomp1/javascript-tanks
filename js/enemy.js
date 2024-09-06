@@ -31,10 +31,12 @@ class EnemyTank {
 
             // Check for collisions with enemies, boundaries, and barriers
             if (!this.isCollidingWithEnemy(nextX, nextY, enemies) &&
-                this.isWithinBounds(nextX, nextY) &&
                 !this.isCollidingWithBarrier(nextX, nextY, barriers)) {
                 this.x = nextX;
                 this.y = nextY;
+
+                // After updating the position, make sure it's within bounds
+                this.clampToBounds(); // Clamp the position to stay within bounds
             } else {
                 // If collision detected, back up
                 this.isBackingUp = true;
@@ -95,16 +97,16 @@ class EnemyTank {
 
     // Enemy tank shoots a bullet at the player
     shoot(enemyBullets) {
-        // if (this.shootCooldown <= 0) {
-        //     const bulletSpeed = 4;
-        //     const bulletX = this.x + Math.cos(this.turretAngle) * (this.width / 2);
-        //     const bulletY = this.y + Math.sin(this.turretAngle) * (this.height / 2);
-        //     const bullet = new EnemyBullet(bulletX, bulletY, this.turretAngle, bulletSpeed);
-        //     enemyBullets.push(bullet); // Add bullet to the array
-        //     this.shootCooldown = 100; // Reset cooldown after shooting
-        // } else {
-        //     this.shootCooldown--; // Decrease cooldown
-        // }
+        if (this.shootCooldown <= 0) {
+            const bulletSpeed = 4;
+            const bulletX = this.x + Math.cos(this.turretAngle) * (this.width / 2);
+            const bulletY = this.y + Math.sin(this.turretAngle) * (this.height / 2);
+            const bullet = new EnemyBullet(bulletX, bulletY, this.turretAngle, bulletSpeed, 1);
+            enemyBullets.push(bullet); // Add bullet to the array
+            this.shootCooldown = 100; // Reset cooldown after shooting
+        } else {
+            this.shootCooldown--; // Decrease cooldown
+        }
     }
 
     // Method to handle backing up if the enemy hits an obstacle
@@ -150,10 +152,13 @@ class EnemyTank {
         return false; // No collision
     }
 
-    // Check if the tank is within the canvas boundaries
-    isWithinBounds(nextX, nextY) {
+    // Ensure the tank remains within the canvas boundaries
+    clampToBounds() {
         const margin = this.width / 2;
-        return nextX > margin && nextX < canvas.width - margin && nextY > margin && nextY < canvas.height - margin;
+        if (this.x < margin) this.x = margin;
+        if (this.x > canvas.width - margin) this.x = canvas.width - margin;
+        if (this.y < margin) this.y = margin;
+        if (this.y > canvas.height - margin) this.y = canvas.height - margin;
     }
 
     // Update target angle based on player's position (with some randomness)

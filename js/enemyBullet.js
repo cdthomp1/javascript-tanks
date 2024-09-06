@@ -1,11 +1,12 @@
 class EnemyBullet {
-    constructor(x, y, angle, speed) {
+    constructor(x, y, angle, speed, maxRicochetCount) {
         this.x = x;
         this.y = y;
         this.angle = angle;
         this.speed = speed;
         this.radius = 5;
         this.ricochetCount = 0; // Count of ricochets
+        this.maxRicochetCount = maxRicochetCount ?? 2;
     }
 
     move() {
@@ -46,7 +47,7 @@ class EnemyBullet {
         // Check if bullet hits a barrier
         for (const barrier of barriers) {
             if (barrier.isCollidingWithBullet(this)) {
-                if (this.ricochetCount < 2) {
+                if (this.ricochetCount < this.maxRicochetCount) {
                     // Reflect bullet based on the side it hits
                     if (this.x > barrier.x && this.x < barrier.x + barrier.width) {
                         this.angle = -this.angle; // Vertical reflection

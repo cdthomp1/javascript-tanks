@@ -21,7 +21,7 @@ let enemyBullets; // Array to store enemy bullets
 let isGameOver = false; // Track whether the game is over
 
 // Function to create a randomized barrier position
-function createRandomBarrier() {
+function createRandomBarrier(i) {
     const barrierWidth = 100; // Fixed width of the barriers
     const barrierHeight = 50; // Fixed height of the barriers
 
@@ -37,7 +37,7 @@ function initializeGame() {
     resizeCanvas(); // Ensure the canvas matches the window size
     player = new PlayerTank(canvas.width / 2, canvas.height / 2, 'blue');
     bullets = []; // Array to store active bullets
-    enemies = []; // Array to store enemy tanks
+    enemies = []; // Array to store enemy tanksw
     barriers = []; // Array to store barriers
     enemyBullets = []; // Array to store enemy bullets
 
@@ -50,6 +50,7 @@ function initializeGame() {
     // Randomly create barriers
     for (let i = 0; i < barrierCount; i++) {
         barriers.push(createRandomBarrier());
+        console.table(barriers)
     }
 
     hideGameOver(); // Hide game over modal when initializing the game
