@@ -4,7 +4,9 @@ const gameOverModal = document.getElementById('gameOverModal');
 const gameOverOverlay = document.getElementById('gameOverOverlay');
 const resetButton = document.getElementById('resetButton');
 
-const barrierCount = 5; // Number of barriers
+let currentLevel = 1; // Start at level 1
+let maxLevel = 5; // Define how many levels you want
+let isGameOver = false; // Track whether the game is over
 
 // Function to set the canvas size to match the window size
 function resizeCanvas() {
@@ -14,48 +16,70 @@ function resizeCanvas() {
 
 // Initialize player, enemy tanks, bullets, and barriers
 let player;
-let bullets;
-let enemies;
-let barriers;
-let enemyBullets; // Array to store enemy bullets
-let isGameOver = false; // Track whether the game is over
-
-// Function to create a randomized barrier position
-function createRandomBarrier(i) {
-    const barrierWidth = 100; // Fixed width of the barriers
-    const barrierHeight = 50; // Fixed height of the barriers
-
-    // Ensure the barrier doesn't go out of bounds
-    const x = Math.random() * (canvas.width - barrierWidth);
-    const y = Math.random() * (canvas.height - barrierHeight);
-
-    return new Barrier(x, y, barrierWidth, barrierHeight, 'gray');
-}
+let bullets = [];
+let enemies = [];
+let barriers = [];
+let enemyBullets = [];
 
 // Function to initialize or reset the game
 function initializeGame() {
     resizeCanvas(); // Ensure the canvas matches the window size
     player = new PlayerTank(canvas.width / 2, canvas.height / 2, 'blue');
     bullets = []; // Array to store active bullets
-    enemies = []; // Array to store enemy tanksw
+    enemies = []; // Array to store enemy tanks
     barriers = []; // Array to store barriers
     enemyBullets = []; // Array to store enemy bullets
 
-    // Create a few enemy tanks
-    for (let i = 0; i < 3; i++) {
-        const enemy = new EnemyTank(Math.random() * canvas.width, Math.random() * canvas.height);
-        enemies.push(enemy);
-    }
-
-    // Randomly create barriers
-    for (let i = 0; i < barrierCount; i++) {
-        barriers.push(createRandomBarrier());
-        console.table(barriers)
-    }
+    initializeLevel(currentLevel); // Initialize the current level
 
     hideGameOver(); // Hide game over modal when initializing the game
     isGameOver = false; // Reset the game state
 }
+
+// Initialize levels with different enemy and barrier layouts
+function initializeLevel(level) {
+    console.log("Initializing Level: " + level);
+
+    // Clear previous enemies, barriers, and bullets
+    enemies = [];
+    barriers = [];
+    bullets = [];
+    enemyBullets = [];
+
+    // Level 1 - 1 enemy and predefined barriers
+    if (level === 1) {
+        enemies.push(new EnemyTank(600, 150, 'green'));
+        barriers.push(new Barrier(300, 200, 100, 50, 'gray'));
+        barriers.push(new Barrier(500, 400, 150, 50, 'gray'));
+    }
+
+    // Level 2 - 2 enemies and more barriers
+    if (level === 2) {
+        enemies.push(new EnemyTank(600, 150, 'green'));
+        enemies.push(new EnemyTank(700, 350, 'green'));
+        barriers.push(new Barrier(300, 200, 100, 50, 'gray'));
+        barriers.push(new Barrier(500, 400, 150, 50, 'gray'));
+        barriers.push(new Barrier(200, 300, 50, 150, 'gray'));
+    }
+
+    // Level 3 - 3 enemies and more complex layout
+    if (level === 3) {
+        enemies.push(new EnemyTank(600, 150, 'green'));
+        enemies.push(new EnemyTank(700, 350, 'green'));
+        enemies.push(new EnemyTank(200, 400, 'green'));
+        barriers.push(new Barrier(100, 200, 100, 50, 'gray'));
+        barriers.push(new Barrier(500, 400, 150, 50, 'gray'));
+        barriers.push(new Barrier(400, 150, 50, 150, 'gray'));
+    }
+
+    console.log("Enemies added: ", enemies.length);
+    console.log("Barriers added: ", barriers.length);
+
+    // Ensure enemies and barriers are properly logged and displayed
+    enemies.forEach(enemy => console.log(`Enemy at (${enemy.x}, ${enemy.y})`));
+    barriers.forEach(barrier => console.log(`Barrier at (${barrier.x}, ${barrier.y})`));
+}
+
 
 // Function to show the Game Over modal
 function showGameOver() {
@@ -102,7 +126,8 @@ function resetGame() {
 
 // Event listener for resetting the game via button
 resetButton.addEventListener('click', () => {
-    initializeGame(); // Reinitialize the game when the reset button is clicked
+    currentLevel = 1; // Reset to level 1 on game restart
+    initializeGame(); // Reinitialize the game
     requestAnimationFrame(gameLoop); // Resume the game loop
 });
 
@@ -110,9 +135,10 @@ resetButton.addEventListener('click', () => {
 function gameLoop() {
     if (isGameOver) return; // Stop the game loop if the game is over
 
+    // Clear the previous frame
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-    // Draw the barriers
+    // Draw the barriers for the current level
     barriers.forEach(barrier => {
         barrier.draw(ctx);
     });
@@ -126,7 +152,7 @@ function gameLoop() {
     // Draw the player tank and its turret
     player.draw(ctx);
 
-    // Move and draw player bullets
+    // Move and draw player bullets (loop from the end to avoid index issues)
     for (let i = bullets.length - 1; i >= 0; i--) {
         const bullet = bullets[i];
         bullet.move();
@@ -142,9 +168,10 @@ function gameLoop() {
         for (let j = enemies.length - 1; j >= 0; j--) {
             const enemy = enemies[j];
             if (!enemy.isDestroyed && bullet.isCollidingWithTank(enemy)) {
-                enemy.isDestroyed = true; // Destroy the enemy
+                console.log(`Enemy at (${enemy.x}, ${enemy.y}) destroyed!`);
+                enemy.isDestroyed = true; // Mark enemy as destroyed
                 bullets.splice(i, 1); // Remove the bullet
-                break; // Break out of the inner loop once the bullet is removed
+                break; // Exit bullet-enemy check once bullet is removed
             }
         }
     }
@@ -174,18 +201,31 @@ function gameLoop() {
         if (!enemy.isDestroyed) {
             enemy.move(player, enemies, barriers, enemyBullets);
             enemy.draw(ctx);
-            allEnemiesDestroyed = false; // At least one enemy is still active
+            allEnemiesDestroyed = false; // If any enemy is still alive, this stays false
         }
     });
 
-    // Check if all enemies are destroyed, and show the Game Over screen if true
+    // Check if all enemies are destroyed and go to next level if true
     if (allEnemiesDestroyed) {
-        resetGame(); // Show Game Over modal when all enemies are destroyed
-        return;
+        console.log("ALL DONE! ");
+        if (currentLevel < maxLevel) {
+            currentLevel++; // Move to next level
+            console.log("ADVANCING");
+
+            // Reinitialize and force the game to refresh objects in the next level
+            initializeLevel(currentLevel); // Load next level
+        } else {
+            alert("Congratulations, you've completed all levels!");
+            resetGame(); // Reset to level 1 after all levels are completed
+        }
+        // return;
     }
 
+    // Continue game loop
     requestAnimationFrame(gameLoop);
 }
+
+
 
 // Start the game
 initializeGame();
