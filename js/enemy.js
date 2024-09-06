@@ -3,8 +3,8 @@ class EnemyTank {
         this.x = x;
         this.y = y;
         this.color = color;
-        this.width = 40;
-        this.height = 40;
+        this.width = 65; // Width of the tank body
+        this.height = 40; // Height of the tank body
         this.angle = Math.random() * Math.PI * 2; // Body angle
         this.turretAngle = Math.random() * Math.PI * 2; // Turret angle
         this.speed = 1.5;
@@ -59,11 +59,19 @@ class EnemyTank {
             ctx.save();
             ctx.translate(this.x, this.y);
             ctx.rotate(this.angle);
+
+            // Draw tracks on the top and bottom
+            ctx.fillStyle = 'black';
+            ctx.fillRect(-(this.width + 8) / 2, -this.height / 2 - 10, this.width + 8, 10); // Top track
+            ctx.fillRect(-(this.width + 8) / 2, this.height / 2, this.width + 8, 10); // Bottom track
+
+            // Draw the main body of the tank
             ctx.fillStyle = this.color;
             ctx.fillRect(-this.width / 2, -this.height / 2, this.width, this.height);
+
             ctx.restore();
 
-            // Draw the turret
+            // Draw the turret on top of the tank body
             this.drawTurret(ctx);
         }
     }
@@ -87,16 +95,16 @@ class EnemyTank {
 
     // Enemy tank shoots a bullet at the player
     shoot(enemyBullets) {
-        if (this.shootCooldown <= 0) {
-            const bulletSpeed = 4;
-            const bulletX = this.x + Math.cos(this.turretAngle) * (this.width / 2);
-            const bulletY = this.y + Math.sin(this.turretAngle) * (this.height / 2);
-            const bullet = new EnemyBullet(bulletX, bulletY, this.turretAngle, bulletSpeed);
-            enemyBullets.push(bullet); // Add bullet to the array
-            this.shootCooldown = 100; // Reset cooldown after shooting
-        } else {
-            this.shootCooldown--; // Decrease cooldown
-        }
+        // if (this.shootCooldown <= 0) {
+        //     const bulletSpeed = 4;
+        //     const bulletX = this.x + Math.cos(this.turretAngle) * (this.width / 2);
+        //     const bulletY = this.y + Math.sin(this.turretAngle) * (this.height / 2);
+        //     const bullet = new EnemyBullet(bulletX, bulletY, this.turretAngle, bulletSpeed);
+        //     enemyBullets.push(bullet); // Add bullet to the array
+        //     this.shootCooldown = 100; // Reset cooldown after shooting
+        // } else {
+        //     this.shootCooldown--; // Decrease cooldown
+        // }
     }
 
     // Method to handle backing up if the enemy hits an obstacle
