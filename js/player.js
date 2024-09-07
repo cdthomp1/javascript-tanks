@@ -2,13 +2,30 @@ class PlayerTank {
     constructor(x, y, color = 'blue') {
         this.x = x;
         this.y = y;
-        this.width = 65; // Width of the tank body
-        this.height = 40; // Height of the tank body
-        this.angle = 0; // Tank body rotation
-        this.speed = 2;
-        this.rotationSpeed = 0.05;
-        this.turretAngle = 0; // Separate turret angle for more control
+        this.width = 65;
+        this.height = 40;
+        this.angle = 0;
+        this.speed = 2; // Set default movement speed
+        this.rotationSpeed = 0.05; // Set default rotation speed
+        this.turretAngle = 0;
         this.color = color;
+        this.velocityX = 0; // Track current movement velocity
+        this.velocityY = 0; // Track current movement velocity
+    }
+
+    resetMovement() {
+        console.log("Plater reset")
+        this.velocityX = 0; // Reset velocity, but keep speed and rotation capabilities intact
+        this.velocityY = 0;
+
+        console.log("this.velocityX", this.velocityX)
+        console.log("this.velocityY", this.velocityY)
+    }
+
+    updatePosition(x, y) {
+        this.x = x;
+        this.y = y;
+        this.resetMovement();
     }
 
     draw(ctx) {
@@ -96,8 +113,6 @@ class PlayerTank {
         ) {
             this.x = nextX;
             this.y = nextY;
-        } else {
-            this.snapToBoundary(); // Ensure the player doesn't go beyond the boundary
         }
     }
 
@@ -112,8 +127,6 @@ class PlayerTank {
         ) {
             this.x = nextX;
             this.y = nextY;
-        } else {
-            this.snapToBoundary(); // Ensure the player doesn't go beyond the boundary
         }
     }
 
@@ -124,6 +137,7 @@ class PlayerTank {
     rotateRight() {
         this.angle += this.rotationSpeed;
     }
+
 
     shoot(bullets) {
         const bulletSpeed = 5;
