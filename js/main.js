@@ -9,12 +9,12 @@ function createLevels() {
     return [
         {
             level: new Level(1,
-                [{ x: 1100, y: 150, color: 'green' }], // Enemies for Level 3
+                [{ x: ((canvas.width / 2) + (canvas.width / 4)), y: 150, color: 'green' }], // Enemies for Level 3
                 [
-                    new Barrier(750, 0, 50, 400, 'grey'),
-                    new Rubble(750, 400, 50, 50, 'brown'),
-                    new Rubble(750, 450, 50, 50, 'brown'),
-                    new Barrier(750, 500, 50, (canvas.height - 500), 'grey'),
+                    new Barrier((canvas.width / 2), 0, 50, 400, 'grey'),
+                    new Rubble((canvas.width / 2), 400, 50, 50, 'brown'),
+                    new Rubble((canvas.width / 2), 450, 50, 50, 'brown'),
+                    new Barrier((canvas.width / 2), 500, 50, (canvas.height - 500), 'grey'),
                 ]),
             playerPosition: { x: 100, y: 100 }
         }
