@@ -46,22 +46,17 @@ class Bullet {
         // Check if bullet hits a barrier
         for (const barrier of barriers) {
             if (barrier.isCollidingWithBullet(this)) {
-                if (!this.ricocheted) {
-                    // Handle ricochet based on which side of the barrier the bullet hits
-                    if (this.x > barrier.x && this.x < barrier.x + barrier.width) {
-                        this.angle = -this.angle; // Vertical reflection
-                    } else {
-                        this.angle = Math.PI - this.angle; // Horizontal reflection
-                    }
-                    this.ricocheted = true; // Mark bullet as ricocheted
-                } else {
-                    return true; // Destroy the bullet after the second collision
+                // Let the barrier handle what happens when the bullet collides with it
+                const destroyBullet = barrier.handleBulletCollision(this);
+                if (destroyBullet) {
+                    return true; // Destroy the bullet if the barrier wants to
                 }
             }
         }
 
         return false; // Bullet is not destroyed
     }
+
 
     // Check if the bullet is out of bounds (off the canvas)
     isOutOfBounds(canvas) {

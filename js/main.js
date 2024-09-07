@@ -147,10 +147,25 @@ function gameLoop() {
 
         let bulletRemoved = false; // Track if the bullet has been removed in this frame
 
-        if (bullet.ricochetIfNeeded(canvas, activeLevel.barriers)) {
-            bullets.splice(i, 1); // Remove the bullet if it should be destroyed
-            continue;
+        // Check for bullet-barrier collisions (including rubble) and ricochet
+        for (let j = activeLevel.barriers.length - 1; j >= 0; j--) {
+            const barrier = activeLevel.barriers[j];
+            if (barrier.isCollidingWithBullet(bullet)) {
+                const ricochetResult = bullet.ricochetIfNeeded(canvas, [barrier]);
+
+                if (ricochetResult) {
+                    bullets.splice(i, 1); // Remove bullet if destroyed
+                    bulletRemoved = true;
+                    break; // No further processing of this bullet
+                }
+
+                if (barrier.isDestroyed) {
+                    activeLevel.barriers.splice(j, 1); // Remove the barrier if destroyed
+                }
+            }
         }
+
+        if (bulletRemoved) continue; // Skip further processing if the bullet was removed
 
         // Check for bullet-enemy collisions
         for (let j = activeLevel.enemies.length - 1; j >= 0; j--) {
@@ -165,35 +180,13 @@ function gameLoop() {
         }
 
         if (bulletRemoved) continue; // Skip further processing if the bullet was removed
-
-        // Check for bullet-barrier collisions (including rubble)
-        for (let j = activeLevel.barriers.length - 1; j >= 0; j--) {
-            const barrier = activeLevel.barriers[j];
-            if (barrier.isCollidingWithBullet(bullet)) {
-                bullets.splice(i, 1); // Remove the bullet on collision
-                if (barrier.isDestroyed) {
-                    activeLevel.barriers.splice(j, 1); // Remove the barrier if destroyed
-                }
-                break;
-            }
-        }
     }
 
-    // Check player bullets against barriers (including rubble)
+    // Remove destroyed barriers (including Rubble)
     for (let i = activeLevel.barriers.length - 1; i >= 0; i--) {
         const barrier = activeLevel.barriers[i];
-
-        // Check collision with each bullet
-        for (let j = bullets.length - 1; j >= 0; j--) {
-            const bullet = bullets[j];
-            if (barrier.isCollidingWithBullet(bullet)) {
-                bullets.splice(j, 1); // Remove bullet on collision
-            }
-        }
-
-        // Remove destroyed barriers (e.g., Rubble)
         if (barrier.isDestroyed) {
-            activeLevel.barriers.splice(i, 1); // Remove barrier from the array
+            activeLevel.barriers.splice(i, 1); // Remove destroyed barriers from the array
         }
     }
 
@@ -241,6 +234,7 @@ function gameLoop() {
 
     requestAnimationFrame(gameLoop);
 }
+
 
 // Start the game
 initializeGame();
