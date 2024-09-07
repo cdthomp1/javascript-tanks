@@ -23,39 +23,37 @@ class Bullet {
 
     // Ricochet logic for canvas boundaries and walls
     ricochetIfNeeded(canvas, barriers) {
-        // Check if bullet hits the canvas boundaries (left or right)
-        if (this.x - this.radius <= 0 || this.x + this.radius >= canvas.width) {
+        // Check if bullet hits canvas boundaries (left/right and top/bottom)
+        const hitHorizontalBoundary = this.x - this.radius <= 0 || this.x + this.radius >= canvas.width;
+        const hitVerticalBoundary = this.y - this.radius <= 0 || this.y + this.radius >= canvas.height;
+
+        if (hitHorizontalBoundary || hitVerticalBoundary) {
             if (!this.ricocheted) {
-                this.angle = Math.PI - this.angle; // Reflect horizontally
-                this.ricocheted = true; // Mark bullet as ricocheted
+                if (hitHorizontalBoundary) {
+                    this.angle = Math.PI - this.angle; // Reflect horizontally
+                }
+                if (hitVerticalBoundary) {
+                    this.angle = -this.angle; // Reflect vertically
+                }
+                this.ricocheted = true;
             } else {
                 return true; // Destroy the bullet after the second collision
             }
         }
 
-        // Check if bullet hits the canvas boundaries (top or bottom)
-        if (this.y - this.radius <= 0 || this.y + this.radius >= canvas.height) {
-            if (!this.ricocheted) {
-                this.angle = -this.angle; // Reflect vertically
-                this.ricocheted = true; // Mark bullet as ricocheted
-            } else {
-                return true; // Destroy the bullet after the second collision
-            }
-        }
-
-        // Check if bullet hits a barrier
+        // Check for barrier collisions
         for (const barrier of barriers) {
             if (barrier.isCollidingWithBullet(this)) {
-                // Let the barrier handle what happens when the bullet collides with it
                 const destroyBullet = barrier.handleBulletCollision(this);
                 if (destroyBullet) {
-                    return true; // Destroy the bullet if the barrier wants to
+                    return true;
                 }
             }
         }
 
         return false; // Bullet is not destroyed
     }
+
 
 
     // Check if the bullet is out of bounds (off the canvas)

@@ -147,18 +147,19 @@ function gameLoop() {
 
         let bulletRemoved = false; // Track if the bullet has been removed in this frame
 
-        // Check for bullet-barrier collisions (including rubble) and ricochet
+        // Check if the bullet should ricochet off canvas boundaries
+        const ricochetResult = bullet.ricochetIfNeeded(canvas, activeLevel.barriers);
+
+        if (ricochetResult) {
+            bullets.splice(i, 1); // Remove bullet if destroyed
+            bulletRemoved = true;
+            continue; // Skip further processing for this bullet
+        }
+
+        // Check for bullet-barrier collisions (including rubble)
         for (let j = activeLevel.barriers.length - 1; j >= 0; j--) {
             const barrier = activeLevel.barriers[j];
             if (barrier.isCollidingWithBullet(bullet)) {
-                const ricochetResult = bullet.ricochetIfNeeded(canvas, [barrier]);
-
-                if (ricochetResult) {
-                    bullets.splice(i, 1); // Remove bullet if destroyed
-                    bulletRemoved = true;
-                    break; // No further processing of this bullet
-                }
-
                 if (barrier.isDestroyed) {
                     activeLevel.barriers.splice(j, 1); // Remove the barrier if destroyed
                 }
@@ -197,6 +198,7 @@ function gameLoop() {
             bullet.move();
             bullet.draw(ctx);
 
+            // Check if enemy bullet should ricochet off canvas boundaries
             if (bullet.ricochetIfNeeded(canvas, activeLevel.barriers)) {
                 enemyBullets.splice(i, 1);
                 continue;
@@ -234,6 +236,7 @@ function gameLoop() {
 
     requestAnimationFrame(gameLoop);
 }
+
 
 
 // Start the game
