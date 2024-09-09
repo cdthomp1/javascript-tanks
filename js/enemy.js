@@ -3,6 +3,7 @@ class EnemyTank {
         this.x = x;
         this.y = y;
         this.health = health; // Add health property
+        this.maxHealth = health; // Add health property
         this.color = color;
         this.width = 65;
         this.height = 40;
@@ -64,10 +65,40 @@ class EnemyTank {
         }
     }
 
+    // Method to draw health bar
+    drawHealthBar(ctx) {
+
+        const barWidth = 50; // Width of the health bar
+        const barHeight = 5; // Height of the health bar
+        const barX = this.x - barWidth / 2; // Position the health bar centered above the tank
+        const barY = (this.y - this.height / 2 - 10) - 30; // Position it slightly above the tank
+
+        // Calculate health percentage
+        const healthPercentage = this.health / this.maxHealth;
+        const currentBarWidth = barWidth * healthPercentage;
+
+        // Set color based on health percentage
+        let barColor = 'green';
+        if (healthPercentage <= 0.5 && healthPercentage > 0.2) {
+            barColor = 'yellow';
+        } else if (healthPercentage <= 0.2) {
+            barColor = 'red';
+        }
+
+        // Draw the background of the health bar
+        ctx.fillStyle = 'gray';
+        ctx.fillRect(barX, barY, barWidth, barHeight);
+
+        // Draw the current health (foreground) of the health bar
+        ctx.fillStyle = barColor;
+        ctx.fillRect(barX, barY, currentBarWidth, barHeight);
+    }
+
     // Draw the enemy tank and its turret
     draw(ctx) {
         if (!this.isDestroyed) { // Draw only if the tank is not destroyed
             // Draw the tank body
+            this.drawHealthBar(ctx)
             ctx.save();
             ctx.translate(this.x, this.y);
             ctx.rotate(this.angle);

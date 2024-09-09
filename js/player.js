@@ -12,6 +12,7 @@ class PlayerTank {
         this.velocityX = 0;
         this.velocityY = 0;
         this.health = health; // New health property
+        this.maxHealth = health; // Save the initial max health for the health bar
         this.isDestroyed = false;
     }
 
@@ -38,8 +39,41 @@ class PlayerTank {
         this.resetMovement();
     }
 
+    // Method to draw health bar
+    drawHealthBar(ctx) {
+
+        const barWidth = 50; // Width of the health bar
+        const barHeight = 5; // Height of the health bar
+        const barX = this.x - barWidth / 2; // Position the health bar centered above the tank
+        const barY = (this.y - this.height / 2 - 10) - 30; // Position it slightly above the tank
+
+        // Calculate health percentage
+        const healthPercentage = this.health / this.maxHealth;
+        const currentBarWidth = barWidth * healthPercentage;
+
+        // Set color based on health percentage
+        let barColor = 'green';
+        if (healthPercentage <= 0.5 && healthPercentage > 0.2) {
+            barColor = 'yellow';
+        } else if (healthPercentage <= 0.2) {
+            barColor = 'red';
+        }
+
+        // Draw the background of the health bar
+        ctx.fillStyle = 'gray';
+        ctx.fillRect(barX, barY, barWidth, barHeight);
+
+        // Draw the current health (foreground) of the health bar
+        ctx.fillStyle = barColor;
+        ctx.fillRect(barX, barY, currentBarWidth, barHeight);
+    }
+
+
     draw(ctx) {
         if (this.isDestroyed) return; // Don't draw if tank is destroyed
+        // Draw health bar above the tank
+        this.drawHealthBar(ctx);
+
         ctx.save();
         ctx.translate(this.x, this.y);
         ctx.rotate(this.angle);
