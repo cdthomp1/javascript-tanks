@@ -14,6 +14,7 @@ class PlayerTank {
         this.health = health; // New health property
         this.maxHealth = health; // Save the initial max health for the health bar
         this.isDestroyed = false;
+        this.bulletLimit = 5;
     }
 
     // Take damage and reduce health
@@ -44,6 +45,7 @@ class PlayerTank {
 
         const barWidth = 50; // Width of the health bar
         const barHeight = 5; // Height of the health bar
+        const borderWidth = 1; // Thickness of the border
         const barX = this.x - barWidth / 2; // Position the health bar centered above the tank
         const barY = (this.y - this.height / 2 - 10) - 30; // Position it slightly above the tank
 
@@ -58,6 +60,10 @@ class PlayerTank {
         } else if (healthPercentage <= 0.2) {
             barColor = 'red';
         }
+
+        // Draw the border of the health bar
+        ctx.fillStyle = 'black';
+        ctx.fillRect(barX - borderWidth, barY - borderWidth, barWidth + 2 * borderWidth, barHeight + 2 * borderWidth);
 
         // Draw the background of the health bar
         ctx.fillStyle = 'gray';
@@ -176,11 +182,13 @@ class PlayerTank {
     }
 
     shoot(bullets) {
-        const bulletSpeed = 5;
-        const bulletX = this.x + Math.cos(this.turretAngle) * (this.width / 2);
-        const bulletY = this.y + Math.sin(this.turretAngle) * (this.height / 2);
-        const bullet = new Bullet(bulletX, bulletY, this.turretAngle, bulletSpeed, 1); // Adjust this line for different bullet types
-        bullets.push(bullet);
+        if (this.bulletLimit > bullets.length) {
+            const bulletSpeed = 5;
+            const bulletX = this.x + Math.cos(this.turretAngle) * (this.width / 2);
+            const bulletY = this.y + Math.sin(this.turretAngle) * (this.height / 2);
+            const bullet = new Bullet(bulletX, bulletY, this.turretAngle, bulletSpeed, 1); // Adjust this line for different bullet types
+            bullets.push(bullet);
+        }
     }
 
     isWithinBounds(nextX, nextY) {

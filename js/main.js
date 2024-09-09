@@ -18,6 +18,15 @@ function createLevels() {
         },
         {
             level: new Level(2,
+                [{ x: 1100, y: 400, color: 'green' }, { x: 1100, y: 600, color: 'green' }], // Enemies for Level 3
+                [
+                    new Barrier((canvas.width / 2), (canvas.height / 4), 50, 400, 'grey'),
+                    new Barrier((canvas.width / 4) + 50, (canvas.height / 4), 750, 50, 'grey'),
+                ]),
+            playerPosition: { x: 550, y: 400 }
+        },
+        {
+            level: new Level(3,
                 [{ x: ((canvas.width / 5) * 3 + (canvas.width / 4)), y: 150, color: 'green' }], // Enemies for Level 3
                 [
                     new Barrier((canvas.width / 4), 100, 50, 110, 'grey'),
@@ -175,10 +184,8 @@ function gameLoop() {
                 if (barrier.handleBulletCollision(bullet)) {
                     bullets.splice(i, 1); // Remove the bullet
                 }
-                console.log(barrier)
                 // Remove the rubble from barriers if it's destroyed
                 if (barrier.isDestroyed) {
-                    console.log("REMOVING")
                     activeLevel.barriers.splice(j, 1); // Remove destroyed rubble/barrier
                 }
 
@@ -192,11 +199,16 @@ function gameLoop() {
                 enemy.takeDamage(bullet.damage); // Deal damage to the enemy tank
                 if (enemy.health <= 0) {
                     enemy.isDestroyed = true; // Mark enemy as destroyed
-                    console.log(`Enemy at (${enemy.x}, ${enemy.y}) destroyed!`);
                 }
                 bullets.splice(i, 1); // Remove the bullet after collision
             }
         });
+
+        if (bullet.isOutOfBounds(canvas)) {
+            console.log("GONE");
+            bullets.splice(i, 1);
+            console.log(bullets)
+        }
     });
 
     // Move and draw enemy bullets
@@ -228,10 +240,15 @@ function gameLoop() {
             player.takeDamage(bullet.damage); // Deal damage to the player tank
             if (player.health <= 0) {
                 player.isDestroyed = true; // Mark player as destroyed
-                console.log('Player tank destroyed!');
                 resetGame(); // Trigger game over
             }
             enemyBullets.splice(i, 1); // Remove the bullet after collision
+        }
+
+        if (bullet.isOutOfBounds(canvas)) {
+            console.log("GONE");
+            enemyBullets.splice(i, 1);
+            console.log(enemyBullets)
         }
     });
 

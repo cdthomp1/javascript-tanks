@@ -16,6 +16,8 @@ class EnemyTank {
         this.isBackingUp = false;
         this.backupTime = 0;
         this.shootCooldown = 100; // Cooldown to control shooting frequency
+        this.bulletLimit = 5;
+
     }
 
     // Method for enemy to take damage
@@ -70,6 +72,7 @@ class EnemyTank {
 
         const barWidth = 50; // Width of the health bar
         const barHeight = 5; // Height of the health bar
+        const borderWidth = 1; // Thickness of the border
         const barX = this.x - barWidth / 2; // Position the health bar centered above the tank
         const barY = (this.y - this.height / 2 - 10) - 30; // Position it slightly above the tank
 
@@ -84,6 +87,10 @@ class EnemyTank {
         } else if (healthPercentage <= 0.2) {
             barColor = 'red';
         }
+
+        // Draw the border of the health bar
+        ctx.fillStyle = 'black';
+        ctx.fillRect(barX - borderWidth, barY - borderWidth, barWidth + 2 * borderWidth, barHeight + 2 * borderWidth);
 
         // Draw the background of the health bar
         ctx.fillStyle = 'gray';
@@ -138,15 +145,17 @@ class EnemyTank {
 
     // Enemy tank shoots a bullet at the player
     shoot(enemyBullets) {
-        if (this.shootCooldown <= 0) {
-            const bulletSpeed = 4;
-            const bulletX = this.x + Math.cos(this.turretAngle) * (this.width / 2);
-            const bulletY = this.y + Math.sin(this.turretAngle) * (this.height / 2);
-            const bullet = new EnemyBullet(bulletX, bulletY, this.turretAngle, bulletSpeed, 1);
-            enemyBullets.push(bullet); // Add bullet to the array
-            this.shootCooldown = 100; // Reset cooldown after shooting
-        } else {
-            this.shootCooldown--; // Decrease cooldown
+        if (this.bulletLimit > enemyBullets.length) {
+            if (this.shootCooldown <= 0) {
+                const bulletSpeed = 4;
+                const bulletX = this.x + Math.cos(this.turretAngle) * (this.width / 2);
+                const bulletY = this.y + Math.sin(this.turretAngle) * (this.height / 2);
+                const bullet = new EnemyBullet(bulletX, bulletY, this.turretAngle, bulletSpeed, 1);
+                enemyBullets.push(bullet); // Add bullet to the array
+                this.shootCooldown = 100; // Reset cooldown after shooting
+            } else {
+                this.shootCooldown--; // Decrease cooldown
+            }
         }
     }
 
