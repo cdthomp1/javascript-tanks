@@ -7,15 +7,15 @@ const resetButton = document.getElementById('resetButton');
 // Function to create fresh Level objects
 function createLevels() {
     return [
-        // {
-        //     level: new Level(1,
-        //         [{ x: 1100, y: 400, color: 'green' }], // Enemies for Level 3
-        //         [
-        //             new Barrier((canvas.width / 2), (canvas.height / 4), 50, 400, 'grey'),
-        //             new Barrier((canvas.width / 4) + 50, (canvas.height / 4), 750, 50, 'grey'),
-        //         ]),
-        //     playerPosition: { x: 550, y: 400 }
-        // },
+        {
+            level: new Level(1,
+                [{ x: 1100, y: 400, color: 'green' }], // Enemies for Level 3
+                [
+                    new Barrier((canvas.width / 2), (canvas.height / 4), 50, 400, 'grey'),
+                    new Barrier((canvas.width / 4) + 50, (canvas.height / 4), 750, 50, 'grey'),
+                ]),
+            playerPosition: { x: 550, y: 400 }
+        },
         {
             level: new Level(2,
                 [{ x: ((canvas.width / 5) * 3 + (canvas.width / 4)), y: 150, color: 'green' }], // Enemies for Level 3
