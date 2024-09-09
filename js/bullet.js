@@ -1,60 +1,53 @@
 class Bullet {
-    constructor(x, y, angle, speed) {
+    constructor(x, y, angle, speed, damage = 10, maxRicochetCount = 2) {
         this.x = x;
         this.y = y;
         this.angle = angle;
         this.speed = speed;
+        this.damage = damage; // New damage property
         this.radius = 5;
-        this.ricocheted = false; // Tracks if the bullet has already ricocheted
+        this.maxRicochetCount = maxRicochetCount;
+        this.ricochetCount = 0; // Count of ricochets
     }
 
+    // Move the bullet forward based on its angle and speed
     move() {
         this.x += Math.cos(this.angle) * this.speed;
         this.y += Math.sin(this.angle) * this.speed;
     }
 
+    // Draw the bullet on the canvas
     draw(ctx) {
         ctx.beginPath();
         ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
-        ctx.fillStyle = 'black';
+        ctx.fillStyle = 'black'; // Default color for a regular bullet
         ctx.fill();
         ctx.closePath();
     }
 
-    // Ricochet logic for canvas boundaries and walls
-    ricochetIfNeeded(canvas, barriers) {
-        // Check if bullet hits canvas boundaries (left/right and top/bottom)
-        const hitHorizontalBoundary = this.x - this.radius <= 0 || this.x + this.radius >= canvas.width;
-        const hitVerticalBoundary = this.y - this.radius <= 0 || this.y + this.radius >= canvas.height;
+    // Check if the bullet should ricochet off canvas boundaries
+    ricochetIfNeeded(canvas) {
+        let ricocheted = false;
 
-        if (hitHorizontalBoundary || hitVerticalBoundary) {
-            if (!this.ricocheted) {
-                if (hitHorizontalBoundary) {
-                    this.angle = Math.PI - this.angle; // Reflect horizontally
-                }
-                if (hitVerticalBoundary) {
-                    this.angle = -this.angle; // Reflect vertically
-                }
-                this.ricocheted = true;
-            } else {
-                return true; // Destroy the bullet after the second collision
-            }
+        // Check horizontal boundary (left or right)
+        if (this.x - this.radius <= 0 || this.x + this.radius >= canvas.width) {
+            this.angle = Math.PI - this.angle; // Reflect horizontally
+            ricocheted = true;
         }
 
-        // Check for barrier collisions
-        for (const barrier of barriers) {
-            if (barrier.isCollidingWithBullet(this)) {
-                const destroyBullet = barrier.handleBulletCollision(this);
-                if (destroyBullet) {
-                    return true;
-                }
-            }
+        // Check vertical boundary (top or bottom)
+        if (this.y - this.radius <= 0 || this.y + this.radius >= canvas.height) {
+            this.angle = -this.angle; // Reflect vertically
+            ricocheted = true;
         }
 
-        return false; // Bullet is not destroyed
+        if (ricocheted) {
+            this.ricochetCount++;
+        }
+
+        // Return true if the bullet has ricocheted more than allowed
+        return this.ricochetCount >= this.maxRicochetCount;
     }
-
-
 
     // Check if the bullet is out of bounds (off the canvas)
     isOutOfBounds(canvas) {
@@ -68,5 +61,12 @@ class Bullet {
         const distance = Math.sqrt(dx * dx + dy * dy);
         const collisionDistance = this.radius + tank.width / 2; // Radius of bullet + radius of tank
         return distance < collisionDistance;
+    }
+
+    // Deal damage to a tank
+    dealDamage(tank) {
+        if (this.isCollidingWithTank(tank)) {
+            tank.takeDamage(this.damage); // Apply bullet damage to the tank
+        }
     }
 }

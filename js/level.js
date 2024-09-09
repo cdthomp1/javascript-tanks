@@ -10,7 +10,7 @@ class Level {
     initializeLevel(enemiesConfig, barriersConfig) {
         // Initialize enemies
         enemiesConfig.forEach(enemyData => {
-            const enemy = new EnemyTank(enemyData.x, enemyData.y, enemyData.color);
+            const enemy = new EnemyTank(enemyData.x, enemyData.y, 20, enemyData.color);
             this.enemies.push(enemy);
         });
 
@@ -29,8 +29,7 @@ class Level {
         let allEnemiesDestroyed = true;
         this.enemies.forEach(enemy => {
             if (!enemy.isDestroyed) {
-                enemy.move(player, this.enemies, this.barriers, enemyBullets);
-                enemy.draw(ctx);
+
                 allEnemiesDestroyed = false;
             }
         });

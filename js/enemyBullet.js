@@ -1,12 +1,9 @@
-class EnemyBullet {
+class EnemyBullet extends Bullet {
     constructor(x, y, angle, speed, maxRicochetCount) {
-        this.x = x;
-        this.y = y;
-        this.angle = angle;
-        this.speed = speed;
+        super(x, y, angle, speed, maxRicochetCount)
         this.radius = 5;
         this.ricochetCount = 0; // Count of ricochets
-        this.maxRicochetCount = maxRicochetCount ?? 2;
+
     }
 
     move() {
@@ -27,45 +24,9 @@ class EnemyBullet {
 
     // Ricochet logic for canvas boundaries and barriers
     ricochetIfNeeded(canvas, barriers) {
-        // Check if bullet hits the canvas boundaries (left or right)
-        if (this.x - this.radius <= 0 || this.x + this.radius >= canvas.width) {
-            if (this.ricochetCount < 2) {
-                this.angle = Math.PI - this.angle; // Reflect horizontally
-                this.ricochetCount++; // Increment ricochet count
-            } else {
-                return true; // Destroy the bullet after 2 ricochets
-            }
-        }
-
-        // Check if bullet hits the canvas boundaries (top or bottom)
-        if (this.y - this.radius <= 0 || this.y + this.radius >= canvas.height) {
-            if (this.ricochetCount < 2) {
-                this.angle = -this.angle; // Reflect vertically
-                this.ricochetCount++; // Increment ricochet count
-            } else {
-                return true; // Destroy the bullet after 2 ricochets
-            }
-        }
-
-        // Check if bullet hits a barrier
-        for (const barrier of barriers) {
-            if (barrier.isCollidingWithBullet(this)) {
-                if (this.ricochetCount < this.maxRicochetCount) {
-                    // Reflect bullet based on the side it hits
-                    if (this.x > barrier.x && this.x < barrier.x + barrier.width) {
-                        this.angle = -this.angle; // Vertical reflection
-                    } else {
-                        this.angle = Math.PI - this.angle; // Horizontal reflection
-                    }
-                    this.ricochetCount++; // Increment ricochet count
-                } else {
-                    return true; // Destroy the bullet after 2 ricochets
-                }
-            }
-        }
-
-        return false; // Bullet is not destroyed
+        super.ricochetIfNeeded(canvas, barriers);
     }
+
 
     // Check if the bullet is colliding with the player
     isCollidingWithPlayer(player) {

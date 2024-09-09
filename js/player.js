@@ -1,25 +1,35 @@
 class PlayerTank {
-    constructor(x, y, color = 'blue') {
+    constructor(x, y, health = 100, color = 'blue') {
         this.x = x;
         this.y = y;
         this.width = 65;
         this.height = 40;
         this.angle = 0;
-        this.speed = 2; // Set default movement speed
-        this.rotationSpeed = 0.05; // Set default rotation speed
+        this.speed = 2;
+        this.rotationSpeed = 0.05;
         this.turretAngle = 0;
         this.color = color;
-        this.velocityX = 0; // Track current movement velocity
-        this.velocityY = 0; // Track current movement velocity
+        this.velocityX = 0;
+        this.velocityY = 0;
+        this.health = health; // New health property
+        this.isDestroyed = false;
+    }
+
+    // Take damage and reduce health
+    takeDamage(damage) {
+        console.log("HERE")
+        this.health -= damage;
+        if (this.health <= 0) {
+            this.isDestroyed = true;
+            console.log("Player tank destroyed!");
+        }
+
+        console.log("PLAYER HEALTH", this.health)
     }
 
     resetMovement() {
-        console.log("Plater reset")
-        this.velocityX = 0; // Reset velocity, but keep speed and rotation capabilities intact
+        this.velocityX = 0;
         this.velocityY = 0;
-
-        console.log("this.velocityX", this.velocityX)
-        console.log("this.velocityY", this.velocityY)
     }
 
     updatePosition(x, y) {
@@ -29,49 +39,46 @@ class PlayerTank {
     }
 
     draw(ctx) {
-        // Draw the tank body and tracks
+        if (this.isDestroyed) return; // Don't draw if tank is destroyed
         ctx.save();
         ctx.translate(this.x, this.y);
         ctx.rotate(this.angle);
 
-        // Draw tracks on the top and bottom
+        // Draw tracks
         ctx.fillStyle = 'black';
-        ctx.fillRect(-(this.width + 8) / 2, -this.height / 2 - 10, this.width + 8, 10); // Top track
-        ctx.fillRect(-(this.width + 8) / 2, this.height / 2, this.width + 8, 10); // Bottom track
+        ctx.fillRect(-(this.width + 8) / 2, -this.height / 2 - 10, this.width + 8, 10);
+        ctx.fillRect(-(this.width + 8) / 2, this.height / 2, this.width + 8, 10);
 
-        // Draw the main body of the tank
+        // Draw tank body
         ctx.fillStyle = this.color;
         ctx.fillRect(-this.width / 2, -this.height / 2, this.width, this.height);
 
-        // Draw the shaded section on the front of the tank
         this.drawShadedFront(ctx);
         ctx.restore();
 
-        // Draw the turret on top of the tank body
+        // Draw turret and front indicator
         this.drawTurret(ctx);
         this.drawFrontIndicator(ctx);
     }
 
     drawTurret(ctx) {
-        // Draw the turret and barrel
         ctx.save();
         ctx.translate(this.x, this.y);
-        ctx.rotate(this.turretAngle); // The turret can rotate independently from the body
+        ctx.rotate(this.turretAngle);
 
-        // Draw turret base (circular)
+        // Draw turret base
         ctx.beginPath();
         ctx.arc(0, 0, 15, 0, Math.PI * 2);
         ctx.fillStyle = 'darkgray';
         ctx.fill();
 
-        // Draw the turret barrel (rectangle extending from the turret)
+        // Draw turret barrel
         ctx.fillStyle = 'darkgray';
         ctx.fillRect(0, -5, 40, 10); // Barrel pointing forward
         ctx.restore();
     }
 
     drawFrontIndicator(ctx) {
-        // Save the context and apply the transformation (position and rotation)
         ctx.save();
         ctx.translate(this.x, this.y);
         ctx.rotate(this.angle);
@@ -80,22 +87,18 @@ class PlayerTank {
         ctx.strokeStyle = 'red';
         ctx.lineWidth = 2;
         ctx.beginPath();
-        ctx.moveTo(0, 0); // Start from the tank's center
-        ctx.lineTo(this.width / 2 + 10, 0); // Line extends in front of the tank
+        ctx.moveTo(0, 0);
+        ctx.lineTo(this.width / 2 + 10, 0);
         ctx.stroke();
 
-        // Restore the context after drawing
         ctx.restore();
     }
 
-
     drawShadedFront(ctx) {
-        // Add a semi-transparent or darker rectangle for shading the front
-        ctx.fillStyle = 'rgba(0, 0, 0, 0.5)'; // Semi-transparent black
-        ctx.fillRect(0, -this.height / 2, this.width / 2, this.height); // Front half shading
+        ctx.fillStyle = 'rgba(0, 0, 0, 0.5)';
+        ctx.fillRect(0, -this.height / 2, this.width / 2, this.height);
     }
 
-    // Update the turret angle to point towards the mouse
     updateTurretAngle(mouseX, mouseY) {
         const dx = mouseX - this.x;
         const dy = mouseY - this.y;
@@ -138,12 +141,11 @@ class PlayerTank {
         this.angle += this.rotationSpeed;
     }
 
-
     shoot(bullets) {
         const bulletSpeed = 5;
         const bulletX = this.x + Math.cos(this.turretAngle) * (this.width / 2);
         const bulletY = this.y + Math.sin(this.turretAngle) * (this.height / 2);
-        const bullet = new Bullet(bulletX, bulletY, this.turretAngle, bulletSpeed);
+        const bullet = new Bullet(bulletX, bulletY, this.turretAngle, bulletSpeed, 1); // Adjust this line for different bullet types
         bullets.push(bullet);
     }
 
@@ -153,7 +155,6 @@ class PlayerTank {
     }
 
     snapToBoundary() {
-        // Ensure the player is snapped back to the nearest boundary when they move out of bounds
         const margin = this.width / 2;
         if (this.x < margin) this.x = margin;
         if (this.x > canvas.width - margin) this.x = canvas.width - margin;
@@ -176,7 +177,6 @@ class PlayerTank {
         return false;
     }
 
-    // Check if the tank is colliding with any barrier
     isCollidingWithBarrier(nextX, nextY, barriers) {
         for (const barrier of barriers) {
             if (barrier.isCollidingWithTank({ x: nextX, y: nextY, width: this.width, height: this.height })) {

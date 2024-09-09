@@ -1,9 +1,10 @@
 class Barrier {
-    constructor(x, y, width, height, color = 'gray') {
+    constructor(x, y, width, height, health = 100, color = 'gray') {
         this.x = x;
         this.y = y;
         this.width = width;
         this.height = height;
+        this.health = health; // New health property for barriers
         this.color = color;
         this.isDestroyed = false;
     }
@@ -36,19 +37,40 @@ class Barrier {
         );
     }
 
-    // Handle bullet collision: regular barriers will cause ricochet
+    // Handle bullet collision and reduce barrier health
     handleBulletCollision(bullet) {
-        // Regular barriers ricochet bullets
-        const withinVerticalRange = bullet.x > this.x && bullet.x < this.x + this.width;
-        const withinHorizontalRange = bullet.y > this.y && bullet.y < this.y + this.height;
+        const barrierLeft = this.x;
+        const barrierRight = this.x + this.width;
+        const barrierTop = this.y;
+        const barrierBottom = this.y + this.height;
 
-        if (withinVerticalRange) {
-            bullet.angle = -bullet.angle; // Vertical reflection
-        } else if (withinHorizontalRange) {
-            bullet.angle = Math.PI - bullet.angle; // Horizontal reflection
+        // Determine if the bullet hit from left/right or top/bottom
+        const hitFromLeftOrRight = bullet.x < barrierLeft || bullet.x > barrierRight;
+        const hitFromTopOrBottom = bullet.y < barrierTop || bullet.y > barrierBottom;
+
+        // Horizontal ricochet (left or right sides of the barrier)
+        if (hitFromLeftOrRight) {
+            bullet.angle = Math.PI - bullet.angle; // Reflect horizontally
+        }
+        // Vertical ricochet (top or bottom sides of the barrier)
+        else if (hitFromTopOrBottom) {
+            bullet.angle = -bullet.angle; // Reflect vertically
         }
 
-        bullet.ricocheted = true; // Mark the bullet as ricocheted
+        bullet.ricochetCount++; // Increment ricochet count
+        this.takeDamage(bullet.damage); // Barrier takes damage based on bullet
+
+        // Return true to destroy the bullet if it exceeds ricochet count
+        return bullet.ricochetCount >= bullet.maxRicochetCount;
+    }
+
+    // Apply damage to the barrier and destroy it if health reaches zero
+    takeDamage(damage) {
+        this.health -= damage;
+        if (this.health <= 0) {
+            this.isDestroyed = true;
+            console.log("Barrier destroyed!");
+        }
     }
 
     // Check if the tank is colliding with the barrier

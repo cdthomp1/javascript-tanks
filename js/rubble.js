@@ -1,35 +1,24 @@
 class Rubble extends Barrier {
-    constructor(x, y, width, height, color = 'brown') {
-        super(x, y, width, height, color);
-        this.timesHit = 0;
-        this.hitLimit = 2;
-        this.hit = false;
+    constructor(x, y, width, height, hitLimit = 2, color = 'brown') {
+        super(x, y, width, height, hitLimit * 50, color); // Correctly pass color to the parent constructor
+        this.timesHit = 0; // Tracks how many times rubble was hit
+        this.hitLimit = hitLimit; // Number of hits before rubble is destroyed
     }
 
-    // Handle bullet collision: Rubble doesn't ricochet but gets destroyed
+    // Handle bullet collision – rubble absorbs hits without ricochet
     handleBulletCollision(bullet) {
-        // Check if the bullet hit the rubble
-        const collision = super.isCollidingWithBullet(bullet);
-        if (collision) {
-            console.log("collide")
-            if (!this.hit) {
-                // Only count the hit if it's not been processed in this frame yet
-                this.timesHit += 1;
-                console.log(`Hit Count: ${this.timesHit} / ${this.hitLimit}`);
-                this.hit = true; // Mark that this rubble has been hit in this frame
-                this.color = 'rgb(71,40,36)'
-                if (this.timesHit >= this.hitLimit) {
-                    console.log('Rubble destroyed!');
-                    this.isDestroyed = true;
-                }
-            }
-            // Reset the hit flag if no collision in this frame
-            this.hit = false;
-            return true; // Bullet collided with the rubble
+        this.timesHit += 1; // Increment hit count
+        console.log(`Rubble hit: ${this.timesHit} times`);
+
+        // Change color to indicate damage
+        this.color = 'rgb(71,40,36)'; // Change color when hit
+
+        // Destroy the rubble if hit limit is reached
+        if (this.timesHit >= this.hitLimit) {
+            console.log('Rubble destroyed!');
+            this.isDestroyed = true;
         }
 
-        // Reset the hit flag if no collision in this frame
-        this.hit = false;
-        return false;
+        return true; // Always destroy the bullet when it hits rubble
     }
 }

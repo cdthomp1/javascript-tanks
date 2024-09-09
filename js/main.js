@@ -7,14 +7,28 @@ const resetButton = document.getElementById('resetButton');
 // Function to create fresh Level objects
 function createLevels() {
     return [
+        // {
+        //     level: new Level(1,
+        //         [{ x: 1100, y: 400, color: 'green' }], // Enemies for Level 3
+        //         [
+        //             new Barrier((canvas.width / 2), (canvas.height / 4), 50, 400, 'grey'),
+        //             new Barrier((canvas.width / 4) + 50, (canvas.height / 4), 750, 50, 'grey'),
+        //         ]),
+        //     playerPosition: { x: 550, y: 400 }
+        // },
         {
-            level: new Level(1,
-                [{ x: ((canvas.width / 2) + (canvas.width / 4)), y: 150, color: 'green' }], // Enemies for Level 3
+            level: new Level(2,
+                [{ x: ((canvas.width / 5) * 3 + (canvas.width / 4)), y: 150, color: 'green' }], // Enemies for Level 3
                 [
+                    new Barrier((canvas.width / 4), 100, 50, 110, 'grey'),
+                    new Barrier((canvas.width / 4), 500, 50, 110, 'grey'),
                     new Barrier((canvas.width / 2), 0, 50, 400, 'grey'),
-                    new Rubble((canvas.width / 2), 400, 50, 50, 'brown'),
-                    new Rubble((canvas.width / 2), 450, 50, 50, 'brown'),
+                    new Rubble((canvas.width / 2), 400, 50, 50, 2, 'brown'),
+                    new Rubble((canvas.width / 2), 450, 50, 50, 2, 'brown'),
                     new Barrier((canvas.width / 2), 500, 50, (canvas.height - 500), 'grey'),
+                    new Barrier((canvas.width / 4) * 3, 100, 50, 110, 'grey'),
+                    new Barrier((canvas.width / 4) * 3, 500, 50, 110, 'grey'),
+
                 ]),
             playerPosition: { x: 100, y: 100 }
         }
@@ -41,7 +55,7 @@ let enemyBullets = [];
 // Function to initialize or reset the game
 function initializeGame() {
     resizeCanvas(); // Ensure the canvas matches the window size
-    player = new PlayerTank(canvas.width / 2, canvas.height / 2, 'blue');
+    player = new PlayerTank(canvas.width / 2, canvas.height / 2, 100, 'blue');
     bullets = []; // Array to store active bullets
     enemyBullets = []; // Array to store enemy bullets
 
@@ -97,6 +111,7 @@ canvas.addEventListener('click', () => {
 // Function to handle the reset game logic
 function resetGame() {
     // Show the Game Over modal
+    playerHasMoved = false;
     showGameOver();
     currentLevelIndex = 0; // Reset to the first level
     player.resetMovement(); // Reset the player's movement to prevent momentum
@@ -124,12 +139,19 @@ function gameLoop() {
     activeLevel.drawBarriers(ctx);
 
     // Draw the player tank and its turret (Always draw the player)
-    player.draw(ctx);
+    if (!player.isDestroyed) {
+        player.draw(ctx);
+    }
 
-    // Always draw enemy tanks (even before the player moves)
+    // Move and draw enemy tanks (even before the player moves)
     activeLevel.enemies.forEach(enemy => {
         if (!enemy.isDestroyed) {
-            enemy.draw(ctx); // Ensure enemies are always drawn
+            // Ensure enemies update their position and shoot
+            if (playerHasMoved) {
+                enemy.move(player, activeLevel.enemies, activeLevel.barriers, enemyBullets);
+                enemy.shoot(enemyBullets); // Enemies start shooting after player moves
+            }
+            enemy.draw(ctx); // Draw the enemy
         }
     });
 
@@ -140,108 +162,108 @@ function gameLoop() {
     if (keys['d']) player.rotateRight();
 
     // Move and draw player bullets
-    for (let i = bullets.length - 1; i >= 0; i--) {
-        const bullet = bullets[i];
+    bullets.forEach((bullet, i) => {
         bullet.move();
         bullet.draw(ctx);
 
-        let bulletRemoved = false; // Track if the bullet has been removed in this frame
-
-        // Check if the bullet should ricochet off canvas boundaries
-        const ricochetResult = bullet.ricochetIfNeeded(canvas, activeLevel.barriers);
-
-        if (ricochetResult) {
-            bullets.splice(i, 1); // Remove bullet if destroyed
-            bulletRemoved = true;
-            continue; // Skip further processing for this bullet
-        }
-
-        // Check for bullet-barrier collisions (including rubble)
+        // Check for bullet-barrier collisions
         for (let j = activeLevel.barriers.length - 1; j >= 0; j--) {
             const barrier = activeLevel.barriers[j];
+
             if (barrier.isCollidingWithBullet(bullet)) {
-                if (barrier.isDestroyed) {
-                    activeLevel.barriers.splice(j, 1); // Remove the barrier if destroyed
+                // Handle the bullet collision with the barrier or rubble
+                if (barrier.handleBulletCollision(bullet)) {
+                    bullets.splice(i, 1); // Remove the bullet
                 }
+                console.log(barrier)
+                // Remove the rubble from barriers if it's destroyed
+                if (barrier.isDestroyed) {
+                    console.log("REMOVING")
+                    activeLevel.barriers.splice(j, 1); // Remove destroyed rubble/barrier
+                }
+
+                break; // Exit loop after collision
             }
         }
 
-        if (bulletRemoved) continue; // Skip further processing if the bullet was removed
-
         // Check for bullet-enemy collisions
-        for (let j = activeLevel.enemies.length - 1; j >= 0; j--) {
-            const enemy = activeLevel.enemies[j];
+        activeLevel.enemies.forEach((enemy, j) => {
             if (!enemy.isDestroyed && bullet.isCollidingWithTank(enemy)) {
-                console.log(`Enemy at (${enemy.x}, ${enemy.y}) destroyed!`);
-                enemy.isDestroyed = true; // Mark enemy as destroyed
-                bullets.splice(i, 1); // Remove the bullet
-                bulletRemoved = true;
+                enemy.takeDamage(bullet.damage); // Deal damage to the enemy tank
+                if (enemy.health <= 0) {
+                    enemy.isDestroyed = true; // Mark enemy as destroyed
+                    console.log(`Enemy at (${enemy.x}, ${enemy.y}) destroyed!`);
+                }
+                bullets.splice(i, 1); // Remove the bullet after collision
+            }
+        });
+    });
+
+    // Move and draw enemy bullets
+    enemyBullets.forEach((bullet, i) => {
+        bullet.move();
+        bullet.draw(ctx);
+
+        // Handle enemy bullet-barrier collisions
+        for (let j = activeLevel.barriers.length - 1; j >= 0; j--) {
+            const barrier = activeLevel.barriers[j];
+
+            if (barrier.isCollidingWithBullet(bullet)) {
+                // Handle bullet-barrier collision
+                if (barrier.handleBulletCollision(bullet)) {
+                    enemyBullets.splice(i, 1); // Remove bullet after collision
+                }
+
+                // Remove destroyed rubble or barriers
+                if (barrier.isDestroyed) {
+                    activeLevel.barriers.splice(j, 1); // Remove the destroyed rubble/barrier
+                }
+
                 break;
             }
         }
 
-        if (bulletRemoved) continue; // Skip further processing if the bullet was removed
-    }
-
-    // Remove destroyed barriers (including Rubble)
-    for (let i = activeLevel.barriers.length - 1; i >= 0; i--) {
-        const barrier = activeLevel.barriers[i];
-        if (barrier.isDestroyed) {
-            activeLevel.barriers.splice(i, 1); // Remove destroyed barriers from the array
+        // Check for bullet-player collisions
+        if (!player.isDestroyed && bullet.isCollidingWithTank(player)) {
+            player.takeDamage(bullet.damage); // Deal damage to the player tank
+            if (player.health <= 0) {
+                player.isDestroyed = true; // Mark player as destroyed
+                console.log('Player tank destroyed!');
+                resetGame(); // Trigger game over
+            }
+            enemyBullets.splice(i, 1); // Remove the bullet after collision
         }
-    }
+    });
 
-    // Move and draw enemy bullets and enemies only if the player has moved
-    if (playerHasMoved) {
-        for (let i = enemyBullets.length - 1; i >= 0; i--) {
-            const bullet = enemyBullets[i];
-            bullet.move();
-            bullet.draw(ctx);
+    let allEnemiesDestroyed = activeLevel.updateEnemies(player, enemyBullets, ctx);
 
-            // Check if enemy bullet should ricochet off canvas boundaries
-            if (bullet.ricochetIfNeeded(canvas, activeLevel.barriers)) {
-                enemyBullets.splice(i, 1);
-                continue;
-            }
-
-            if (bullet.isCollidingWithPlayer(player)) {
-                resetGame(); // Show the Game Over modal and pause the game
-                return;
-            }
-        }
-
-        // Move and draw enemies only if the player has moved
-        let allEnemiesDestroyed = activeLevel.updateEnemies(player, enemyBullets, ctx);
-
-        // Check if all enemies are destroyed and advance to the next level
-        if (allEnemiesDestroyed) {
-            console.log("ALL DONE!");
-            if (currentLevelIndex < levels.length - 1) {
-                currentLevelIndex++; // Move to the next level
-                activeLevel = levels[currentLevelIndex].level; // Load the next level
-                player.updatePosition(levels[currentLevelIndex].playerPosition.x, levels[currentLevelIndex].playerPosition.y); // Update player position for the new level
-                playerHasMoved = false; // Reset player movement flag for the new level
-                enemyBullets = []; // Clear any remaining enemy bullets from the previous level
-                bullets = []; // Clear any remaining player bullets from the previous level
-                console.log(`ADVANCING TO LEVEL ${currentLevelIndex + 1}`);
-                Object.keys(keys).forEach(key => {
-                    keys[key] = false;
-                });
-            } else {
-                alert("Congratulations, you've completed all levels!");
-                resetGame(); // Reset to level 1 after all levels are completed
-            }
+    // Check if all enemies are destroyed and advance to the next level
+    if (allEnemiesDestroyed) {
+        console.log("ALL DONE!");
+        if (currentLevelIndex < levels.length - 1) {
+            currentLevelIndex++; // Move to the next level
+            activeLevel = levels[currentLevelIndex].level; // Load the next level
+            player.updatePosition(levels[currentLevelIndex].playerPosition.x, levels[currentLevelIndex].playerPosition.y); // Update player position for the new level
+            playerHasMoved = false; // Reset player movement flag for the new level
+            enemyBullets = []; // Clear any remaining enemy bullets from the previous level
+            bullets = []; // Clear any remaining player bullets from the previous level
+            console.log(`ADVANCING TO LEVEL ${currentLevelIndex + 1}`);
+            Object.keys(keys).forEach(key => {
+                keys[key] = false;
+            });
+        } else {
+            alert("Congratulations, you've completed all levels!");
+            resetGame(); // Reset to level 1 after all levels are completed
         }
     }
 
     requestAnimationFrame(gameLoop);
 }
 
-
-
-// Start the game
+// Initialize the game
 initializeGame();
 requestAnimationFrame(gameLoop);
+
 
 // Add an event listener to resize the canvas when the window is resized
 window.addEventListener('resize', resizeCanvas);

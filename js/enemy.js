@@ -1,10 +1,11 @@
 class EnemyTank {
-    constructor(x, y, color = 'green') {
+    constructor(x, y, health = 100, color = 'green') {
         this.x = x;
         this.y = y;
+        this.health = health; // Add health property
         this.color = color;
-        this.width = 65; // Width of the tank body
-        this.height = 40; // Height of the tank body
+        this.width = 65;
+        this.height = 40;
         this.angle = Math.random() * Math.PI * 2; // Body angle
         this.turretAngle = Math.random() * Math.PI * 2; // Turret angle
         this.speed = 1.5;
@@ -14,6 +15,15 @@ class EnemyTank {
         this.isBackingUp = false;
         this.backupTime = 0;
         this.shootCooldown = 100; // Cooldown to control shooting frequency
+    }
+
+    // Method for enemy to take damage
+    takeDamage(damage) {
+        this.health -= damage; // Reduce health
+        if (this.health <= 0) {
+            this.isDestroyed = true; // Mark tank as destroyed
+            console.log("Enemy tank destroyed!");
+        }
     }
 
     // Move the enemy tank with collision detection
@@ -56,7 +66,7 @@ class EnemyTank {
 
     // Draw the enemy tank and its turret
     draw(ctx) {
-        if (!this.isDestroyed) {
+        if (!this.isDestroyed) { // Draw only if the tank is not destroyed
             // Draw the tank body
             ctx.save();
             ctx.translate(this.x, this.y);
