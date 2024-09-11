@@ -2,7 +2,7 @@ class EnemyBullet extends Bullet {
     constructor(x, y, angle, speed, maxRicochetCount) {
         super(x, y, angle, speed, maxRicochetCount)
         this.radius = 5;
-        this.ricochetCount = 0; // Count of ricochets
+        // this.ricochetCount = 0; // Count of ricochets
 
     }
 
@@ -24,7 +24,7 @@ class EnemyBullet extends Bullet {
 
     // Ricochet logic for canvas boundaries and barriers
     ricochetIfNeeded(canvas, barriers) {
-        super.ricochetIfNeeded(canvas, barriers);
+        return super.ricochetIfNeeded(canvas, barriers);
     }
 
 

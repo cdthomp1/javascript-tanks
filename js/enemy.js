@@ -16,7 +16,7 @@ class EnemyTank {
         this.isBackingUp = false;
         this.backupTime = 0;
         this.shootCooldown = 100; // Cooldown to control shooting frequency
-        this.bulletLimit = 5;
+        this.bulletLimit = 1;
 
     }
 

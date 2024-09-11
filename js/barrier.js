@@ -61,7 +61,7 @@ class Barrier {
         this.takeDamage(bullet.damage); // Barrier takes damage based on bullet
 
         // Return true to destroy the bullet if it exceeds ricochet count
-        return bullet.ricochetCount >= bullet.maxRicochetCount;
+        return this.ricochetCount === this.maxRicochetCount + 1;
     }
 
     // Apply damage to the barrier and destroy it if health reaches zero

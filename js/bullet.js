@@ -1,12 +1,12 @@
 class Bullet {
-    constructor(x, y, angle, speed, damage = 10, maxRicochetCount = 2) {
+    constructor(x, y, angle, speed, damage, maxRicochetCount) {
         this.x = x;
         this.y = y;
         this.angle = angle;
         this.speed = speed;
-        this.damage = damage; // New damage property
+        this.damage = damage ?? 10; // New damage property
         this.radius = 5;
-        this.maxRicochetCount = maxRicochetCount;
+        this.maxRicochetCount = maxRicochetCount ?? 2;
         this.ricochetCount = 0; // Count of ricochets
     }
 
@@ -46,7 +46,7 @@ class Bullet {
         }
 
         // Return true if the bullet has ricocheted more than allowed
-        return this.ricochetCount >= this.maxRicochetCount;
+        return this.ricochetCount === this.maxRicochetCount + 1;
     }
 
     // Check if the bullet is out of bounds (off the canvas)

@@ -325,13 +325,11 @@ function gameLoop() {
 
     // Draw the player tank and its turret
     player.draw();
-    console.log(bullets)
     // Move and draw bullets
     for (let i = bullets.length - 1; i >= 0; i--) {
         const bullet = bullets[i];
         bullet.move();
         bullet.draw();
-        console.table(bullet)
         // Remove bullet if it goes out of bounds
         if (bullet.isOutOfBounds(canvas)) {
             console.log('found one out of bounds')

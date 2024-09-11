@@ -139,6 +139,37 @@ resetButton.addEventListener('click', () => {
     requestAnimationFrame(gameLoop); // Resume the game loop
 });
 
+
+let ammoPacks = [new AmmoPack(200, 300), new AmmoPack(400, 150)]; // Example positions for ammo packs
+
+
+function spawnAmmoPack() {
+    console.log("spawn!")
+    const randomX = Math.random() * canvas.width;
+    const randomY = Math.random() * canvas.height;
+    ammoPacks.push(new AmmoPack(randomX, randomY));
+}
+
+
+// Function to draw the HUD displaying player health and bullet count
+function drawHUD(ctx, player, bullets) {
+    const hudX = canvas.width - 150; // Positioning the HUD near the bottom-right
+    const hudY = canvas.height - 50;
+
+    // Set font and styles
+    ctx.font = '16px Arial';
+    ctx.fillStyle = 'black';
+    ctx.textAlign = 'left';
+
+    // Display bullets left
+    ctx.fillText(`Bullets: ${player.bulletLimit}`, hudX, hudY);
+
+    // Display player health
+    ctx.fillText(`Health: ${player.health}/${player.maxHealth}`, hudX, hudY + 20);
+}
+setInterval(spawnAmmoPack, 10000);
+
+
 function gameLoop() {
     if (isGameOver) return; // Stop the game loop if the game is over
 
@@ -146,6 +177,18 @@ function gameLoop() {
 
     // Draw the barriers for the current level
     activeLevel.drawBarriers(ctx);
+
+    // Draw and handle ammo packs
+    ammoPacks.forEach((ammoPack, i) => {
+        ammoPack.draw(ctx);
+
+        // Check if the player picks up the ammo pack
+        if (ammoPack.isCollidingWithTank(player)) {
+            player.bulletLimit += ammoPack.ammoAmount; // Increase player's ammo limit
+            ammoPacks.splice(i, 1); // Remove the ammo pack after it's picked up
+            console.log("Ammo picked up! New bullet limit: " + player.bulletLimit);
+        }
+    });
 
     // Draw the player tank and its turret (Always draw the player)
     if (!player.isDestroyed) {
@@ -174,6 +217,13 @@ function gameLoop() {
     bullets.forEach((bullet, i) => {
         bullet.move();
         bullet.draw(ctx);
+
+        // Check for ricochet
+        if (bullet.ricochetIfNeeded(canvas)) {
+            // If the bullet has ricocheted too many times, remove it
+            bullets.splice(i, 1);
+            return; // Skip further collision checks for this bullet
+        }
 
         // Check for bullet-barrier collisions
         for (let j = activeLevel.barriers.length - 1; j >= 0; j--) {
@@ -205,9 +255,7 @@ function gameLoop() {
         });
 
         if (bullet.isOutOfBounds(canvas)) {
-            console.log("GONE");
             bullets.splice(i, 1);
-            console.log(bullets)
         }
     });
 
@@ -215,6 +263,13 @@ function gameLoop() {
     enemyBullets.forEach((bullet, i) => {
         bullet.move();
         bullet.draw(ctx);
+
+
+        if (bullet.ricochetIfNeeded(canvas)) {
+            // If the bullet has ricocheted too many times, remove it
+            enemyBullets.splice(i, 1);
+            return; // Skip further collision checks for this bullet
+        }
 
         // Handle enemy bullet-barrier collisions
         for (let j = activeLevel.barriers.length - 1; j >= 0; j--) {
@@ -246,9 +301,7 @@ function gameLoop() {
         }
 
         if (bullet.isOutOfBounds(canvas)) {
-            console.log("GONE");
             enemyBullets.splice(i, 1);
-            console.log(enemyBullets)
         }
     });
 
@@ -264,6 +317,8 @@ function gameLoop() {
             playerHasMoved = false; // Reset player movement flag for the new level
             enemyBullets = []; // Clear any remaining enemy bullets from the previous level
             bullets = []; // Clear any remaining player bullets from the previous level
+            player.health = player.maxHealth;
+            player.bulletLimit = player.bulletLimit > 5 ? player.bulletLimit : 5;
             console.log(`ADVANCING TO LEVEL ${currentLevelIndex + 1}`);
             Object.keys(keys).forEach(key => {
                 keys[key] = false;
@@ -273,6 +328,9 @@ function gameLoop() {
             resetGame(); // Reset to level 1 after all levels are completed
         }
     }
+
+    // Draw HUD in the bottom-right corner
+    drawHUD(ctx, player, bullets);
 
     requestAnimationFrame(gameLoop);
 }

@@ -182,12 +182,14 @@ class PlayerTank {
     }
 
     shoot(bullets) {
-        if (this.bulletLimit > bullets.length) {
+        console.log(this.bulletLimit)
+        if (this.bulletLimit > 0) {
             const bulletSpeed = 5;
             const bulletX = this.x + Math.cos(this.turretAngle) * (this.width / 2);
             const bulletY = this.y + Math.sin(this.turretAngle) * (this.height / 2);
-            const bullet = new Bullet(bulletX, bulletY, this.turretAngle, bulletSpeed, 1); // Adjust this line for different bullet types
+            const bullet = new Bullet(bulletX, bulletY, this.turretAngle, bulletSpeed, 2, 1); // Adjust this line for different bullet types
             bullets.push(bullet);
+            this.bulletLimit -= 1;
         }
     }
 
