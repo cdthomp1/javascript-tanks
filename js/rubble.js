@@ -1,4 +1,6 @@
-class Rubble extends Barrier {
+import Barrier from "./barrier.js";
+
+export default class Rubble extends Barrier {
     constructor(x, y, width, height, hitLimit = 2, color = 'brown') {
         super(x, y, width, height, hitLimit * 50, color); // Correctly pass color to the parent constructor
         this.timesHit = 0; // Tracks how many times rubble was hit
@@ -8,14 +10,12 @@ class Rubble extends Barrier {
     // Handle bullet collision – rubble absorbs hits without ricochet
     handleBulletCollision(bullet) {
         this.timesHit += 1; // Increment hit count
-        console.log(`Rubble hit: ${this.timesHit} times`);
 
         // Change color to indicate damage
         this.color = 'rgb(71,40,36)'; // Change color when hit
 
         // Destroy the rubble if hit limit is reached
         if (this.timesHit >= this.hitLimit) {
-            console.log('Rubble destroyed!');
             this.isDestroyed = true;
         }
 

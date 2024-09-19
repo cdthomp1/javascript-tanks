@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tank Game - Level creator</title>
+    <style>
+
+    </style>
+</head>
+
+<body>
+    <div id="controls">
+        <button onclick="selectObjectType('player')">Player</button>
+        <button onclick="selectObjectType('enemy')">Enemy Tank</button>
+        <button onclick="selectObjectType('ammo')">Ammo Pack</button>
+        <button onclick="selectObjectType('rocketAmmo')">Rocket Ammo Pack</button>
+        <button onclick="selectObjectType('barrier')">Barrier</button>
+        <button onclick="selectObjectType('rubble')">Rubble</button>
+        <button onclick="generateLevelCode()">Generate Code</button>
+    </div>
+    <canvas id="editorCanvas"></canvas>
+    <pre id="output"></pre>
+
+    <script src="creator.js"></script>
+    <script src="js/bullet.js"></script>
+    <script src="js/player.js"></script>
+    <script src="js/enemy.js"></script>
+    <script src="js/enemyBullet.js"></script>
+    <script src="js/rocketBullet.js"></script>
+    <script src="js/barrier.js"></script>
+    <script src="js/explosion.js"></script>
+    <script src="js/rubble.js"></script>
+    <script src="js/ammoPack.js"></script>
+    <script src="js/rocketAmmoPack.js"></script>
+    <script src="js/level.js"></script>
+</body>
+
+</html>

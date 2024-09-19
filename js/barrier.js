@@ -1,4 +1,4 @@
-class Barrier {
+export default class Barrier {
     constructor(x, y, width, height, health = 100, color = 'gray') {
         this.x = x;
         this.y = y;
@@ -69,7 +69,6 @@ class Barrier {
         this.health -= damage;
         if (this.health <= 0) {
             this.isDestroyed = true;
-            console.log("Barrier destroyed!");
         }
     }
 

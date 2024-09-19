@@ -2,7 +2,7 @@ const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
 
 // Tank class with boundary and enemy collision detection
-class Tank {
+export default class Tank {
     constructor(x, y, color) {
         this.x = x;
         this.y = y;
@@ -332,7 +332,6 @@ function gameLoop() {
         bullet.draw();
         // Remove bullet if it goes out of bounds
         if (bullet.isOutOfBounds(canvas)) {
-            console.log('found one out of bounds')
             bullets.splice(i, 1); // Remove bullet from array
         }
     }

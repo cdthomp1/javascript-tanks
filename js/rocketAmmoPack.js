@@ -1,16 +1,20 @@
-class AmmoPack {
+import AmmoPack from "./ammoPack.js";
+
+export default class RocketAmmoPack extends AmmoPack {
     constructor(x, y, ammoAmount = 5) {
+        super(x, y, ammoAmount)
         this.x = x;
         this.y = y;
-        this.width = 45;  // Width of the ammo crate
+        this.width = 65;  // Width of the ammo crate
         this.height = 35; // Height of the ammo crate
         this.ammoAmount = ammoAmount; // How much ammo this pack provides
+        this.type = "rocket"
     }
 
     // Draw the ammo crate on the canvas
     draw(ctx) {
         // Draw the crate body (rectangle)
-        ctx.fillStyle = 'brown'; // Brown color for the crate
+        ctx.fillStyle = 'rgb(255, 0, 0)'; // Brown color for the crate
         ctx.fillRect(this.x - this.width / 2, this.y - this.height / 2, this.width, this.height);
 
         // Draw crate stripes (to make it look more like a crate)
@@ -35,15 +39,10 @@ class AmmoPack {
         ctx.font = "12px Arial";
         ctx.fillStyle = 'white';
         ctx.textAlign = 'center';
-        ctx.fillText("AMMO", this.x, this.y + 4); // Center text on crate
+        ctx.fillText("ROCKET", this.x, this.y + 4); // Center text on crate
     }
     // Check if the player has collided with the ammo crate
     isCollidingWithTank(tank) {
-        const dx = this.x - tank.x;
-        const dy = this.y - tank.y;
-        const distance = Math.sqrt(dx * dx + dy * dy);
-        return distance < this.width / 2 + tank.width / 2;
+        return super.isCollidingWithTank(tank)
     }
 }
-
-export default AmmoPack; 

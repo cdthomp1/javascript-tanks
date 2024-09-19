@@ -1,5 +1,7 @@
-class EnemyTank {
-    constructor(x, y, health = 100, color = 'green') {
+import EnemyBullet from './enemyBullet.js'; // Adjust the path if needed
+
+export default class EnemyTank {
+    constructor(x, y, health = 100, color = 'green', canvas) {
         this.x = x;
         this.y = y;
         this.health = health; // Add health property
@@ -17,7 +19,7 @@ class EnemyTank {
         this.backupTime = 0;
         this.shootCooldown = 100; // Cooldown to control shooting frequency
         this.bulletLimit = 1;
-
+        this.canvas = canvas
     }
 
     // Method for enemy to take damage
@@ -25,7 +27,6 @@ class EnemyTank {
         this.health -= damage; // Reduce health
         if (this.health <= 0) {
             this.isDestroyed = true; // Mark tank as destroyed
-            console.log("Enemy tank destroyed!");
         }
     }
 
@@ -206,9 +207,9 @@ class EnemyTank {
     clampToBounds() {
         const margin = this.width / 2;
         if (this.x < margin) this.x = margin;
-        if (this.x > canvas.width - margin) this.x = canvas.width - margin;
+        if (this.x > this.canvas.width - margin) this.x = this.canvas.width - margin;
         if (this.y < margin) this.y = margin;
-        if (this.y > canvas.height - margin) this.y = canvas.height - margin;
+        if (this.y > this.canvas.height - margin) this.y = this.canvas.height - margin;
     }
 
     // Update target angle based on player's position (with some randomness)

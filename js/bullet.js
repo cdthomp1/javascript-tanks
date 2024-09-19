@@ -1,4 +1,4 @@
-class Bullet {
+export default class Bullet {
     constructor(x, y, angle, speed, damage, maxRicochetCount) {
         this.x = x;
         this.y = y;
@@ -8,6 +8,7 @@ class Bullet {
         this.radius = 5;
         this.maxRicochetCount = maxRicochetCount ?? 2;
         this.ricochetCount = 0; // Count of ricochets
+        this.type = 'bullet'
     }
 
     // Move the bullet forward based on its angle and speed

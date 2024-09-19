@@ -1,5 +1,8 @@
-class PlayerTank {
-    constructor(x, y, health = 100, color = 'blue') {
+import Bullet from "./bullet.js";
+import RocketBullet from "./rocketBullet.js";
+
+export default class PlayerTank {
+    constructor(x, y, health = 100, color = 'blue', canvas) {
         this.x = x;
         this.y = y;
         this.width = 65;
@@ -11,22 +14,30 @@ class PlayerTank {
         this.color = color;
         this.velocityX = 0;
         this.velocityY = 0;
-        this.health = health; // New health property
-        this.maxHealth = health; // Save the initial max health for the health bar
+        this.health = health;
+        this.maxHealth = health;
         this.isDestroyed = false;
-        this.bulletLimit = 5;
+        this.canvas = canvas;
+
+        // Separate limits for normal bullets and rockets
+        this.normalBulletLimit = 5;
+        this.rocketBulletLimit = 5;
+
+        this.currentBulletType = Bullet; // Default bullet type
+    }
+
+    switchBulletType(type) {
+        if (type === Bullet || type === RocketBullet) {
+            this.currentBulletType = type;
+        }
     }
 
     // Take damage and reduce health
     takeDamage(damage) {
-        console.log("HERE")
         this.health -= damage;
         if (this.health <= 0) {
             this.isDestroyed = true;
-            console.log("Player tank destroyed!");
         }
-
-        console.log("PLAYER HEALTH", this.health)
     }
 
     resetMovement() {
@@ -182,28 +193,35 @@ class PlayerTank {
     }
 
     shoot(bullets) {
-        console.log(this.bulletLimit)
-        if (this.bulletLimit > 0) {
+        // Check bullet limit based on the selected bullet type
+        if (this.currentBulletType === Bullet && this.normalBulletLimit > 0) {
             const bulletSpeed = 5;
             const bulletX = this.x + Math.cos(this.turretAngle) * (this.width / 2);
             const bulletY = this.y + Math.sin(this.turretAngle) * (this.height / 2);
-            const bullet = new Bullet(bulletX, bulletY, this.turretAngle, bulletSpeed, 2, 1); // Adjust this line for different bullet types
+            const bullet = new Bullet(bulletX, bulletY, this.turretAngle, bulletSpeed, 10, 2);
             bullets.push(bullet);
-            this.bulletLimit -= 1;
+            this.normalBulletLimit--; // Decrease normal bullet count
+        } else if (this.currentBulletType === RocketBullet && this.rocketBulletLimit > 0) {
+            const bulletSpeed = 5;
+            const bulletX = this.x + Math.cos(this.turretAngle) * (this.width / 2);
+            const bulletY = this.y + Math.sin(this.turretAngle) * (this.height / 2);
+            const bullet = new RocketBullet(bulletX, bulletY, this.turretAngle, bulletSpeed, 25);
+            bullets.push(bullet);
+            this.rocketBulletLimit--; // Decrease rocket bullet count
         }
     }
 
     isWithinBounds(nextX, nextY) {
         const margin = this.width / 2;
-        return nextX > margin && nextX < canvas.width - margin && nextY > margin && nextY < canvas.height - margin;
+        return nextX > margin && nextX < this.canvas.width - margin && nextY > margin && nextY < this.canvas.height - margin;
     }
 
     snapToBoundary() {
         const margin = this.width / 2;
         if (this.x < margin) this.x = margin;
-        if (this.x > canvas.width - margin) this.x = canvas.width - margin;
+        if (this.x > this.canvas.width - margin) this.x = this.canvas.width - margin;
         if (this.y < margin) this.y = margin;
-        if (this.y > canvas.height - margin) this.y = canvas.height - margin;
+        if (this.y > this.canvas.height - margin) this.y = this.canvas.height - margin;
     }
 
     isCollidingWithEnemy(nextX, nextY, enemies) {

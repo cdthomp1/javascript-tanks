@@ -1,4 +1,6 @@
-class EnemyBullet extends Bullet {
+import Bullet from "./bullet.js";
+
+export default class EnemyBullet extends Bullet {
     constructor(x, y, angle, speed, maxRicochetCount) {
         super(x, y, angle, speed, maxRicochetCount)
         this.radius = 5;
