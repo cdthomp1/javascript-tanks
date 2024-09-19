@@ -377,11 +377,27 @@ function gameLoop() {
                 if (barrier.isDestroyed) activeLevel.barriers.splice(j, 1);
             }
         });
+        // Handle bullet-enemy collisions
         activeLevel.enemies.forEach((enemy) => {
             if (!enemy.isDestroyed && bullet.isCollidingWithTank(enemy)) {
                 enemy.takeDamage(bullet.damage);
-                if (enemy.health <= 0) enemy.isDestroyed = true;
-                bullets.splice(i, 1);
+
+                if (bullet instanceof RocketBullet) {
+                    // Add explosion when a rocket hits an enemy
+                    explosions.push(new Explosion(bullet.x, bullet.y));
+
+                    // Remove rocket bullet
+                    bullets.splice(i, 1);
+
+                    // Additional explosion effects or damage handling
+                    return; // Exit to prevent further checks for this bullet
+                }
+
+                if (enemy.health <= 0) {
+                    enemy.isDestroyed = true;
+                }
+
+                bullets.splice(i, 1); // Remove the bullet after collision
             }
         });
         if (bullet.isOutOfBounds(canvas)) bullets.splice(i, 1);
