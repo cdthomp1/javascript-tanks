@@ -1,0 +1,356 @@
+[
+  {
+    "level": 1,
+    "enemies": [
+      {
+        "x": 1050,
+        "y": 100,
+        "color": "green"
+      }
+    ],
+    "barriers": [
+      {
+        "type": "Barrier",
+        "x": 100,
+        "y": 550,
+        "width": 50,
+        "height": 50,
+        "color": "grey"
+      },
+      {
+        "type": "Barrier",
+        "x": 150,
+        "y": 550,
+        "width": 50,
+        "height": 50,
+        "color": "grey"
+      },
+      {
+        "type": "Barrier",
+        "x": 200,
+        "y": 550,
+        "width": 50,
+        "height": 50,
+        "color": "grey"
+      },
+      {
+        "type": "Barrier",
+        "x": 250,
+        "y": 550,
+        "width": 50,
+        "height": 50,
+        "color": "grey"
+      },
+      {
+        "type": "Barrier",
+        "x": 300,
+        "y": 550,
+        "width": 50,
+        "height": 50,
+        "color": "grey"
+      },
+      {
+        "type": "Barrier",
+        "x": 350,
+        "y": 550,
+        "width": 50,
+        "height": 50,
+        "color": "grey"
+      },
+      {
+        "type": "Barrier",
+        "x": 400,
+        "y": 550,
+        "width": 50,
+        "height": 50,
+        "color": "grey"
+      },
+      {
+        "type": "Barrier",
+        "x": 450,
+        "y": 550,
+        "width": 50,
+        "height": 50,
+        "color": "grey"
+      },
+      {
+        "type": "Barrier",
+        "x": 500,
+        "y": 550,
+        "width": 50,
+        "height": 50,
+        "color": "grey"
+      },
+      {
+        "type": "Barrier",
+        "x": 700,
+        "y": 550,
+        "width": 50,
+        "height": 50,
+        "color": "grey"
+      },
+      {
+        "type": "Barrier",
+        "x": 750,
+        "y": 550,
+        "width": 50,
+        "height": 50,
+        "color": "grey"
+      },
+      {
+        "type": "Barrier",
+        "x": 800,
+        "y": 550,
+        "width": 50,
+        "height": 50,
+        "color": "grey"
+      },
+      {
+        "type": "Barrier",
+        "x": 900,
+        "y": 550,
+        "width": 50,
+        "height": 50,
+        "color": "grey"
+      },
+      {
+        "type": "Barrier",
+        "x": 850,
+        "y": 550,
+        "width": 50,
+        "height": 50,
+        "color": "grey"
+      },
+      {
+        "type": "Barrier",
+        "x": 950,
+        "y": 550,
+        "width": 50,
+        "height": 50,
+        "color": "grey"
+      },
+      {
+        "type": "Barrier",
+        "x": 1000,
+        "y": 550,
+        "width": 50,
+        "height": 50,
+        "color": "grey"
+      },
+      {
+        "type": "Barrier",
+        "x": 1050,
+        "y": 550,
+        "width": 50,
+        "height": 50,
+        "color": "grey"
+      },
+      {
+        "type": "Rubble",
+        "x": 550,
+        "y": 550,
+        "width": 50,
+        "height": 50,
+        "durability": 2,
+        "color": "brown"
+      },
+      {
+        "type": "Rubble",
+        "x": 650,
+        "y": 550,
+        "width": 50,
+        "height": 50,
+        "durability": 2,
+        "color": "brown"
+      },
+      {
+        "type": "Rubble",
+        "x": 600,
+        "y": 550,
+        "width": 50,
+        "height": 50,
+        "durability": 2,
+        "color": "brown"
+      },
+      {
+        "type": "Rubble",
+        "x": 550,
+        "y": 250,
+        "width": 50,
+        "height": 50,
+        "durability": 2,
+        "color": "brown"
+      },
+      {
+        "type": "Rubble",
+        "x": 600,
+        "y": 250,
+        "width": 50,
+        "height": 50,
+        "durability": 2,
+        "color": "brown"
+      },
+      {
+        "type": "Rubble",
+        "x": 650,
+        "y": 250,
+        "width": 50,
+        "height": 50,
+        "durability": 2,
+        "color": "brown"
+      },
+      {
+        "type": "Barrier",
+        "x": 500,
+        "y": 250,
+        "width": 50,
+        "height": 50,
+        "color": "grey"
+      },
+      {
+        "type": "Barrier",
+        "x": 450,
+        "y": 250,
+        "width": 50,
+        "height": 50,
+        "color": "grey"
+      },
+      {
+        "type": "Barrier",
+        "x": 400,
+        "y": 250,
+        "width": 50,
+        "height": 50,
+        "color": "grey"
+      },
+      {
+        "type": "Barrier",
+        "x": 350,
+        "y": 250,
+        "width": 50,
+        "height": 50,
+        "color": "grey"
+      },
+      {
+        "type": "Barrier",
+        "x": 300,
+        "y": 250,
+        "width": 50,
+        "height": 50,
+        "color": "grey"
+      },
+      {
+        "type": "Barrier",
+        "x": 200,
+        "y": 250,
+        "width": 50,
+        "height": 50,
+        "color": "grey"
+      },
+      {
+        "type": "Barrier",
+        "x": 150,
+        "y": 250,
+        "width": 50,
+        "height": 50,
+        "color": "grey"
+      },
+      {
+        "type": "Barrier",
+        "x": 100,
+        "y": 250,
+        "width": 50,
+        "height": 50,
+        "color": "grey"
+      },
+      {
+        "type": "Barrier",
+        "x": 250,
+        "y": 250,
+        "width": 50,
+        "height": 50,
+        "color": "grey"
+      },
+      {
+        "type": "Barrier",
+        "x": 700,
+        "y": 250,
+        "width": 50,
+        "height": 50,
+        "color": "grey"
+      },
+      {
+        "type": "Barrier",
+        "x": 800,
+        "y": 250,
+        "width": 50,
+        "height": 50,
+        "color": "grey"
+      },
+      {
+        "type": "Barrier",
+        "x": 750,
+        "y": 250,
+        "width": 50,
+        "height": 50,
+        "color": "grey"
+      },
+      {
+        "type": "Barrier",
+        "x": 850,
+        "y": 250,
+        "width": 50,
+        "height": 50,
+        "color": "grey"
+      },
+      {
+        "type": "Barrier",
+        "x": 1000,
+        "y": 250,
+        "width": 50,
+        "height": 50,
+        "color": "grey"
+      },
+      {
+        "type": "Barrier",
+        "x": 900,
+        "y": 250,
+        "width": 50,
+        "height": 50,
+        "color": "grey"
+      },
+      {
+        "type": "Barrier",
+        "x": 950,
+        "y": 250,
+        "width": 50,
+        "height": 50,
+        "color": "grey"
+      },
+      {
+        "type": "Barrier",
+        "x": 1050,
+        "y": 250,
+        "width": 50,
+        "height": 50,
+        "color": "grey"
+      }
+    ],
+    "ammoPacks": [
+      {
+        "type": "RocketAmmoPack",
+        "x": 150,
+        "y": 100
+      },
+      {
+        "type": "AmmoPack",
+        "x": 1000,
+        "y": 750
+      }
+    ],
+    "playerPosition": {
+      "x": 100,
+      "y": 750
+    }
+  }
+]
