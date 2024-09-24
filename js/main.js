@@ -152,6 +152,7 @@ function resetGame() {
     showGameOver();
     currentLevelIndex = 0;
     player.resetMovement();
+    player.checkIfStopped();
     isGameOver = true;
     Object.keys(keys).forEach(key => {
         keys[key] = false;
@@ -314,6 +315,8 @@ function gameLoop() {
             }
             enemy.draw(ctx);
         }
+
+        enemy.checkIfStopped();
     });
 
     if (keys['w']) player.moveForward(activeLevel.enemies, activeLevel.barriers);
@@ -400,8 +403,10 @@ function gameLoop() {
             resetGame();
         }
     }
+    player.checkIfStopped();
 
     drawHUD(ctx, player, bullets);
+
     requestAnimationFrame(gameLoop);
 }
 

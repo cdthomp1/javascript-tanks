@@ -24,6 +24,32 @@ export default class PlayerTank {
         this.rocketBulletLimit = 5;
 
         this.currentBulletType = Bullet; // Default bullet type
+
+        // Sound effects
+        this.shootSound = new Audio('./sounds/retro-game-shot-152052.mp3'); // Ensure path is correct
+        this.rocketShootSound = new Audio('./sounds/boom_c_06-102838.mp3'); // Ensure path is correct
+        this.movementSound = new Audio('./sounds/tank-track-ratteling-197409.mp3');
+        this.movementSound.loop = true;
+        this.movementSound.volume = 0.2; // Set to 30% volume for movement sound
+        this.movementSoundPlaying = false; // Track if movement sound is playing
+        this.isMoving = false; // Track if tank is currently moving
+    }
+
+    // Start movement sound
+    startMovementSound() {
+        if (!this.movementSoundPlaying) {
+            this.movementSound.currentTime = 0;
+            this.movementSound.play();
+            this.movementSoundPlaying = true;
+        }
+    }
+
+    // Stop movement sound
+    stopMovementSound() {
+        if (this.movementSoundPlaying) {
+            this.movementSound.pause();
+            this.movementSoundPlaying = false;
+        }
     }
 
     switchBulletType(type) {
@@ -53,7 +79,6 @@ export default class PlayerTank {
 
     // Method to draw health bar
     drawHealthBar(ctx) {
-
         const barWidth = 50; // Width of the health bar
         const barHeight = 5; // Height of the health bar
         const borderWidth = 1; // Thickness of the border
@@ -84,7 +109,6 @@ export default class PlayerTank {
         ctx.fillStyle = barColor;
         ctx.fillRect(barX, barY, currentBarWidth, barHeight);
     }
-
 
     draw(ctx) {
         if (this.isDestroyed) return; // Don't draw if tank is destroyed
@@ -167,6 +191,10 @@ export default class PlayerTank {
         ) {
             this.x = nextX;
             this.y = nextY;
+            this.isMoving = true; // Set moving state to true
+            this.startMovementSound(); // Start sound when moving
+        } else {
+            this.isMoving = false; // Set moving state to false when blocked
         }
     }
 
@@ -181,15 +209,36 @@ export default class PlayerTank {
         ) {
             this.x = nextX;
             this.y = nextY;
+            this.isMoving = true; // Set moving state to true
+            this.startMovementSound(); // Start sound when moving
+        } else {
+            this.isMoving = false; // Set moving state to false when blocked
         }
     }
 
     rotateLeft() {
         this.angle -= this.rotationSpeed;
+        this.isMoving = true; // Set moving state to true
+        this.startMovementSound(); // Start sound when rotating
     }
 
     rotateRight() {
         this.angle += this.rotationSpeed;
+        this.isMoving = true; // Set moving state to true
+        this.startMovementSound(); // Start sound when rotating
+    }
+
+    // Call this method at the end of every update to stop sound when no movement occurs
+    checkIfStopped() {
+        if (!this.isMoving) {
+            this.stopMovementSound();  // Stop sound if no movement
+        }
+        this.isMoving = false;  // Reset movement state after each frame
+    }
+
+    // Ensure you stop the movement sound when necessary
+    stopAllSounds() {
+        this.stopMovementSound();
     }
 
     shoot(bullets) {
@@ -201,6 +250,10 @@ export default class PlayerTank {
             const bullet = new Bullet(bulletX, bulletY, this.turretAngle, bulletSpeed, 10, 2);
             bullets.push(bullet);
             this.normalBulletLimit--; // Decrease normal bullet count
+
+            // Play the shooting sound
+            this.shootSound.currentTime = 0;  // Reset sound to play again if needed
+            this.shootSound.play();
         } else if (this.currentBulletType === RocketBullet && this.rocketBulletLimit > 0) {
             const bulletSpeed = 5;
             const bulletX = this.x + Math.cos(this.turretAngle) * (this.width / 2);
@@ -208,6 +261,9 @@ export default class PlayerTank {
             const bullet = new RocketBullet(bulletX, bulletY, this.turretAngle, bulletSpeed, 25);
             bullets.push(bullet);
             this.rocketBulletLimit--; // Decrease rocket bullet count
+
+            this.rocketShootSound.currentTime = 0;  // Reset sound to play again if needed
+            this.rocketShootSound.play();
         }
     }
 

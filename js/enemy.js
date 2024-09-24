@@ -19,7 +19,35 @@ export default class EnemyTank {
         this.backupTime = 0;
         this.shootCooldown = 100; // Cooldown to control shooting frequency
         this.bulletLimit = 1;
-        this.canvas = canvas
+        this.canvas = canvas;
+
+        // Add shooting sound
+        this.shootSound = new Audio('./sounds/retro-game-shot-152052.mp3'); // Path to enemy shooting sound
+        this.shootSound.volume = 0.5; // Set volume to 50%
+
+        // Add movement sound
+        this.movementSound = new Audio('./sounds/tank-track-ratteling-197409.mp3'); // Path to enemy movement sound
+        this.movementSound.loop = true;
+        this.movementSound.volume = 0.3; // Set volume to 30%
+        this.movementSoundPlaying = false; // Track if movement sound is playing
+        this.isMoving = false; // Track if the tank is currently moving
+    }
+
+    // Start movement sound
+    startMovementSound() {
+        if (!this.movementSoundPlaying) {
+            this.movementSound.currentTime = 0;
+            this.movementSound.play();
+            this.movementSoundPlaying = true;
+        }
+    }
+
+    // Stop movement sound
+    stopMovementSound() {
+        if (this.movementSoundPlaying) {
+            this.movementSound.pause();
+            this.movementSoundPlaying = false;
+        }
     }
 
     // Method for enemy to take damage
@@ -27,6 +55,7 @@ export default class EnemyTank {
         this.health -= damage; // Reduce health
         if (this.health <= 0) {
             this.isDestroyed = true; // Mark tank as destroyed
+            this.stopMovementSound(); // Stop sound when destroyed
         }
     }
 
@@ -51,8 +80,10 @@ export default class EnemyTank {
 
                 // After updating the position, make sure it's within bounds
                 this.clampToBounds(); // Clamp the position to stay within bounds
+                this.startMovementSound(); // Start sound when moving
+                this.isMoving = true; // Set moving state to true
             } else {
-                // If collision detected, back up
+                this.isMoving = false; // Set moving state to false when blocked
                 this.isBackingUp = true;
                 this.backupTime = 20; // Back up for 20 frames
             }
@@ -65,6 +96,13 @@ export default class EnemyTank {
 
             // Update target angle for future movement
             this.updateTargetAngle(player);
+        }
+    }
+
+    // Add method to stop movement sound if no movement occurs
+    checkIfStopped() {
+        if (!this.isMoving) {
+            this.stopMovementSound(); // Stop sound if not moving
         }
     }
 
@@ -154,6 +192,10 @@ export default class EnemyTank {
                 const bullet = new EnemyBullet(bulletX, bulletY, this.turretAngle, bulletSpeed, 1);
                 enemyBullets.push(bullet); // Add bullet to the array
                 this.shootCooldown = 100; // Reset cooldown after shooting
+
+                // Play the shooting sound
+                this.shootSound.currentTime = 0;
+                this.shootSound.play();
             } else {
                 this.shootCooldown--; // Decrease cooldown
             }
